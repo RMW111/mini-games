@@ -18,11 +18,14 @@ FROM rust:1.77 as backend-builder
 WORKDIR /app/games-backend
 
 # Создаем пустой проект для кэширования зависимостей
-RUN USER=root cargo new --bin .
+RUN USER=root cargo init --bin .
+
 COPY games-backend/Cargo.lock ./
 COPY games-backend/Cargo.toml ./
+# Эта сборка кэширует зависимости
 RUN cargo build --release
-RUN rm -f target/release/deps/games-backend*
+# Удаляем временный main.rs, чтобы он не конфликтовал со следующим шагом
+RUN rm -f src/main.rs
 
 # Копируем исходный код и собираем проект
 COPY games-backend/src ./src
@@ -37,7 +40,6 @@ RUN apk --no-cache add ca-certificates
 
 # Настройка Nginx
 COPY --from=frontend-builder /app/games-frontend/dist /usr/share/nginx/html
-# Убедитесь, что ваш nginx.conf лежит по этому пути: games-frontend/nginx/nginx.conf
 COPY games-frontend/nginx/nginx.conf /etc/nginx/nginx.conf
 
 # Копируем исполняемый файл бэкенда.
