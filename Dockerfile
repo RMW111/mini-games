@@ -3,29 +3,29 @@
 # --- ЭТАП 1: Сборка React-приложения ---
 FROM node:20-alpine as frontend-builder
 
-WORKDIR /app/frontend
+WORKDIR /app/games-frontend
 
-COPY frontend/package*.json ./
+COPY games-frontend/package*.json ./
 RUN npm install
 
-COPY frontend/ .
+COPY games-frontend/ .
 RUN npm run build
 
 
 # --- ЭТАП 2: Сборка Rust-бэкенда ---
 FROM rust:1.77 as backend-builder
 
-WORKDIR /app/backend
+WORKDIR /app/games-backend
 
 # Создаем пустой проект для кэширования зависимостей
 RUN USER=root cargo new --bin .
-COPY backend/Cargo.lock ./
-COPY backend/Cargo.toml ./
+COPY games-backend/Cargo.lock ./
+COPY games-backend/Cargo.toml ./
 RUN cargo build --release
-RUN rm -f target/release/deps/backend*
+RUN rm -f target/release/deps/games-backend*
 
 # Копируем исходный код и собираем проект
-COPY backend/src ./src
+COPY games-backend/src ./src
 RUN cargo build --release
 
 
@@ -36,12 +36,13 @@ FROM nginx:1.25-alpine
 RUN apk --no-cache add ca-certificates
 
 # Настройка Nginx
-COPY --from=frontend-builder /app/frontend/dist /usr/share/nginx/html
-# Копируем новую конфигурацию Nginx
-COPY frontend/nginx/nginx.conf /etc/nginx/nginx.conf
+COPY --from=frontend-builder /app/games-frontend/dist /usr/share/nginx/html
+# Убедитесь, что ваш nginx.conf лежит по этому пути: games-frontend/nginx/nginx.conf
+COPY games-frontend/nginx/nginx.conf /etc/nginx/nginx.conf
 
-# Копируем исполняемый файл бэкенда
-COPY --from=backend-builder /app/backend/target/release/backend /usr/local/bin/backend
+# Копируем исполняемый файл бэкенда.
+# Убедитесь, что имя 'games-backend' совпадает с `name` в Cargo.toml
+COPY --from=backend-builder /app/games-backend/target/release/games-backend /usr/local/bin/games-backend
 
 # Открываем порт, который слушает Nginx
 EXPOSE 10000
