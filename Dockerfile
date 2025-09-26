@@ -13,7 +13,7 @@ RUN npm run build
 
 
 # --- ЭТАП 2: Сборка Rust-бэкенда ---
-FROM rust:1.77 as backend-builder
+FROM rust:1.79 as backend-builder
 
 WORKDIR /app/games-backend
 
