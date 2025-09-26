@@ -1,0 +1,90 @@
+// --- Ячейка ---
+.cell {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 22px;
+  font-weight: bold;
+  border-radius: 4px;
+  border: 2px solid #555;
+  border-bottom-color: #404040;
+  border-right-color: #404040;
+  user-select: none; // Запрещаем выделение текста
+  transition: background-color 0.2s ease;
+  font-family: 'Arial Black', Gadget, sans-serif;
+}
+
+
+// Состояния ячеек
+.closed {
+  background-color: #4a4a4a;
+  border: 2px solid #555;
+  border-bottom-color: #404040;
+  border-right-color: #404040;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #5a5a5a;
+  }
+}
+
+.opened {
+  background-color: #303030;
+  border: 2px solid #303030;
+  cursor: default;
+}
+
+.flagged {
+  background-color: #4a4a4a;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.exploded {
+  background-color: #ff4d4d;
+  animation: explode 0.5s ease;
+}
+
+.mines1 { color: #6495ED; } // CornflowerBlue
+.mines2 { color: #32CD32; } // LimeGreen
+.mines3 { color: #FF4500; } // OrangeRed
+.mines4 { color: #4169E1; } // RoyalBlue
+.mines5 { color: #B22222; } // Firebrick
+.mines6 { color: #40E0D0; } // Turquoise
+.mines7 { color: #000000; } // Black - не видно, поэтому сделаем фиолетовым
+.mines7 { color: #9400D3; } // DarkViolet
+.mines8 { color: #808080; } // Gray
+
+@keyframes explode {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.pending {
+  background-color: #4a4a4a;
+  cursor: default;
+  position: relative;
+
+  &::after {
+    display: block;
+    content: '';
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

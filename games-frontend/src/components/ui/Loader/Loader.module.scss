@@ -1,0 +1,33 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  padding: 40px;
+  background-color: #1a1a1a;
+}
+
+.spinner {
+  width: 60px;
+  height: 60px;
+  border: 5px solid #444; // Цвет "трека" спиннера
+  border-top-color: #646cff; // Акцентный цвет вашего сайта
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.text {
+  margin-top: 24px;
+  font-size: 18px;
+  color: #c0c0c0;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

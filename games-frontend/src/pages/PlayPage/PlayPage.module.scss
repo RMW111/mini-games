@@ -1,0 +1,22 @@
+.container {
+  display: flex;
+  padding: 40px 24px;
+  gap: 24px;
+}
+
+.gameArea {
+  flex-grow: 1;
+}
+
+// Контейнер для статусов и ошибок
+.statusContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  min-height: calc(100vh - 64px);
+  padding: 40px;
+  background-color: #1a1a1a;
+  color: #fff;
+}
