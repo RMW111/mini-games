@@ -13,7 +13,9 @@ RUN npm run build
 
 
 # --- ЭТАП 2: Сборка Rust-бэкенда ---
-FROM rust:1.85 as backend-builder
+FROM rust:1.85-alpine as backend-builder
+
+RUN apk --no-cache add ca-certificates
 
 WORKDIR /app/games-backend
 
