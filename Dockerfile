@@ -15,7 +15,7 @@ RUN npm run build
 # --- ЭТАП 2: Сборка Rust-бэкенда ---
 FROM rust:1.85-alpine as backend-builder
 
-RUN apk --no-cache add ca-certificates
+RUN apk --no-cache add build-base ca-certificates
 
 WORKDIR /app/games-backend
 
@@ -23,7 +23,6 @@ RUN USER=root cargo init --bin .
 
 COPY games-backend/Cargo.lock ./
 COPY games-backend/Cargo.toml ./
-
 COPY games-backend/.sqlx ./.sqlx
 
 # Кэшируем зависимости
@@ -33,7 +32,6 @@ RUN rm -f src/main.rs
 # Копируем исходный код
 COPY games-backend/src ./src
 
-# Устанавливаем SQLX_OFFLINE в true, чтобы sqlx использовал папку .sqlx
 ENV SQLX_OFFLINE=true
 RUN cargo build --release
 
