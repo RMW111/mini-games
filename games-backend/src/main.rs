@@ -14,13 +14,7 @@ async fn main() {
     dotenvy::dotenv().ok();
     let pull = create_pg_pull().await;
     let app = app::create_app(pull);
-
-    #[cfg(debug_assertions)]
-    let addr = "127.0.0.1:10000";
-
-    #[cfg(not(debug_assertions))]
-    let addr = "0.0.0.0:8080";
-
+    let addr = "127.0.0.1:8080";
     let listener = TcpListener::bind(addr).await.unwrap();
     println!("Сервер запущен на http://{addr}");
     axum::serve(listener, app).await.unwrap()
