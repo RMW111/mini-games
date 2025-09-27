@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        INSERT INTO refresh_tokens (user_id, token_hash)\n        VALUES ($1, $2)\n        ON CONFLICT (user_id) DO UPDATE\n        SET token_hash = EXCLUDED.token_hash, created_at = now()\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "ec5a731ae8001571b44bc1525879bc2d2b4b3122e685fbcf264d9e4db8aa019f"
+}

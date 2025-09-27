@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        INSERT INTO session_participants (session_id, user_id, role)\n        VALUES ($1, $2, 'creator')\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "44a8b6471b9ef8d6697898010a2e445c4b0b3f523c4bd579c14f7b36987e47fc"
+}

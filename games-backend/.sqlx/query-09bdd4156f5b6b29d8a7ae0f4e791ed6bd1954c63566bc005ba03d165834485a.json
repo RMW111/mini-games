@@ -1,0 +1,45 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT p.user_id, u.email, p.role as \"role: _\"\n        FROM session_participants p\n        JOIN users u ON p.user_id = u.id\n        WHERE p.session_id = $1 ORDER BY p.joined_at\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "email",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "role: _",
+        "type_info": {
+          "Custom": {
+            "name": "participant_role",
+            "kind": {
+              "Enum": [
+                "creator",
+                "player",
+                "spectator"
+              ]
+            }
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "09bdd4156f5b6b29d8a7ae0f4e791ed6bd1954c63566bc005ba03d165834485a"
+}

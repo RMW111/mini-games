@@ -1,0 +1,27 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE game_sessions SET game_state = $1, status = $2 WHERE id = $3",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Jsonb",
+        {
+          "Custom": {
+            "name": "session_status",
+            "kind": {
+              "Enum": [
+                "pending",
+                "in_progress",
+                "completed"
+              ]
+            }
+          }
+        },
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "6d2f85758c057c89c79090f3afd9ee11628886e196f9f4b3a77cbe37fd1445d6"
+}

@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        INSERT INTO session_participants (session_id, user_id, role)\n        VALUES ($1, $2, 'player')\n        ON CONFLICT (session_id, user_id) DO NOTHING\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "5949690ebd933e801b55c97d00d1fa2e7e40493ca9693f574b2fc266f369d15b"
+}
