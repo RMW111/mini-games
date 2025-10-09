@@ -12,7 +12,6 @@ export const Header: React.FC<HeaderProps> = ({ username, avatarUrl, onLogout })
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  // Закрываем меню при клике вне
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
@@ -39,7 +38,7 @@ export const Header: React.FC<HeaderProps> = ({ username, avatarUrl, onLogout })
         />
         {menuOpen && (
           <div className={styles.dropdown}>
-            <button onClick={() => {}}>Настройки</button>
+            <button onClick={() => {}}>Профиль</button>
             <button onClick={onLogout}>Выйти</button>
           </div>
         )}

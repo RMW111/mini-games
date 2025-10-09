@@ -15,7 +15,8 @@ export const PlayPage = () => {
   console.log("session:", session);
 
   useEffect(() => {
-    const newSocket = new WebSocket(`wss://${window.location.host}/ws/sessions/${sessionId}`);
+    const baseUrl = import.meta.env.DEV ? "ws://127.0.0.1:8080" : `wss://${window.location.host}`;
+    const newSocket = new WebSocket(`${baseUrl}/ws/sessions/${sessionId}`);
 
     newSocket.onmessage = (event) => {
       try {

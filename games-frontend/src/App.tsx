@@ -8,9 +8,14 @@ import { Interceptor } from "src/components/layout/Interceptor/Interceptor.tsx";
 import { API } from "src/api";
 import { GameLobbyPage } from "src/pages/GameLobbyPage/GameLobbyPage.tsx";
 import { PlayPage } from "src/pages/PlayPage/PlayPage.tsx";
+import { useEffect } from "react";
 
 function App() {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    API.getUserInfo().then(console.log);
+  }, []);
 
   const onLogout = () => {
     API.auth.logout().then(() => navigate("/login"));
