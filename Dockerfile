@@ -29,6 +29,8 @@ RUN cargo build --release
 
 COPY games-backend/src ./src
 
+RUN rm ./target/release/games-backend
+
 ENV SQLX_OFFLINE=true
 RUN cargo build --release
 
