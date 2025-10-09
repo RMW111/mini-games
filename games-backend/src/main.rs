@@ -11,7 +11,13 @@ mod games;
 
 #[tokio::main]
 async fn main() {
+    tracing_subscriber::fmt()
+        .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
+        .init();
+
+    #[cfg(debug_assertions)]
     dotenvy::dotenv().ok();
+
     let pull = create_pg_pull().await;
     let app = app::create_app(pull);
     let addr = "127.0.0.1:8080";
