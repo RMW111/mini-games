@@ -25,11 +25,8 @@ COPY games-backend/Cargo.lock ./
 COPY games-backend/Cargo.toml ./
 COPY games-backend/.sqlx ./.sqlx
 
-# Кэшируем зависимости
 RUN cargo build --release
-RUN rm -f src/main.rs
 
-# Копируем исходный код
 COPY games-backend/src ./src
 
 ENV SQLX_OFFLINE=true
