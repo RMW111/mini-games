@@ -14,21 +14,26 @@ FROM rust:1.85-alpine as backend-builder
 RUN apk --no-cache add build-base ca-certificates
 WORKDIR /app/games-backend
 
+# 1. Копируем только манифесты.
 COPY games-backend/Cargo.toml games-backend/Cargo.lock ./
 
-# 2. Создаем пустой бинарный проект с пустым main.rs.
-# Это не позволит cargo создать исполняемый файл, но заставит его
-# скачать и скомпилировать ВСЕ зависимости из Cargo.toml
-RUN mkdir src && echo "fn main() { panic!(\"Dummy main should not be called\") }" > src/main.rs
-# Собираем только зависимости, а не весь проект
+# 2. Создаем ПУСТУЮ БИБЛИОТЕКУ.
+# Cargo скомпилирует зависимости, но НЕ СОЗДАСТ исполняемый файл.
+RUN mkdir src && echo "pub fn dummy() {}" > src/lib.rs
+
+# 3. Собираем зависимости. Исполняемый файл 'games-backend' НЕ создается.
 RUN cargo build --release --locked
 
-# 3. Теперь копируем наш настоящий код и данные для sqlx
+# 4. Удаляем временную библиотеку.
+RUN rm -f src/lib.rs
+
+# 5. Теперь копируем наш настоящий исходный код (с main.rs) и данные sqlx.
 COPY games-backend/src ./src
 COPY games-backend/.sqlx ./.sqlx
 
-# 4. Собираем финальный бинарный файл.
-# Зависимости уже в кэше, поэтому этот шаг будет очень быстрым.
+# 6. Собираем финальный бинарный файл.
+# Cargo видит main.rs и теперь ОБЯЗАН создать исполняемый файл.
+# Все зависимости уже в кэше, поэтому этот шаг будет очень быстрым.
 ENV SQLX_OFFLINE=true
 RUN cargo build --release --locked
 
