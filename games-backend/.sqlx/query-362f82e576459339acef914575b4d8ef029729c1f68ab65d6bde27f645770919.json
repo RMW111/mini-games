@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT id, email FROM users WHERE id = $1",
+  "query": "SELECT id, email, avatar_url FROM users WHERE id = $1",
   "describe": {
     "columns": [
       {
@@ -12,6 +12,11 @@
         "ordinal": 1,
         "name": "email",
         "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "avatar_url",
+        "type_info": "Text"
       }
     ],
     "parameters": {
@@ -21,8 +26,9 @@
     },
     "nullable": [
       false,
+      false,
       false
     ]
   },
-  "hash": "b4a3b0ae9c157a5a6b7922189cfa08a41627c4cc8b8921632a0ecce482001ecd"
+  "hash": "362f82e576459339acef914575b4d8ef029729c1f68ab65d6bde27f645770919"
 }
