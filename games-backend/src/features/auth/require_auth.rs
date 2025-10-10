@@ -20,7 +20,7 @@ async fn fetch_user_from_db(pool: &PgPool, user_id_str: &str) -> Result<User, Ap
         .parse::<Uuid>()
         .map_err(|_| AppError::Unauthorized("Invalid user ID format in token".into()))?;
 
-    let user = sqlx::query_as!(User, "SELECT id, email FROM users WHERE id = $1", user_id)
+    let user = sqlx::query_as!(User, "SELECT id, email, avatar_url FROM users WHERE id = $1", user_id)
         .fetch_optional(pool)
         .await?
         .ok_or_else(|| AppError::NotFound("User from token not found".into()))?;

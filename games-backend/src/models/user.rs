@@ -6,9 +6,11 @@ use sqlx::FromRow;
 use uuid::Uuid;
 
 #[derive(Debug, Clone, Serialize, FromRow)]
+#[serde(rename_all =  "camelCase")]
 pub struct User {
     pub id: Uuid,
     pub email: String,
+    pub avatar_url: String,
 }
 
 impl<S> FromRequestParts<S> for User where S: Send + Sync {

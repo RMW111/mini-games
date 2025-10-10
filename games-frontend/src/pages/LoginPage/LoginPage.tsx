@@ -2,12 +2,17 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./LoginPage.module.scss";
 import { API } from "src/api";
+import { useAtom } from "jotai";
+import { authAtom } from "src/store/auth.ts";
+import { userAtom } from "src/store/user.ts";
 
 export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const [, setAuth] = useAtom(authAtom);
+  const [, setUser] = useAtom(userAtom);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,7 +22,17 @@ export const LoginPage: React.FC = () => {
       return;
     }
 
-    API.auth.login({ email, password }, { withCredentials: true }).then(() => navigate("/games"));
+    setAuth({ isLoggedIn: false, pending: true });
+    API.auth
+      .login({ email, password }, { withCredentials: true })
+      .then(() => {
+        API.getUserInfo().then(setUser);
+        navigate("/games");
+        setAuth({ isLoggedIn: true, pending: false });
+      })
+      .finally(() => {
+        setAuth((prev) => ({ ...prev, pending: false }));
+      });
   };
 
   return (

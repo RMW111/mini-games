@@ -1,17 +1,18 @@
 import { useState, useRef, useEffect } from "react";
 import styles from "./Header.module.scss";
 import { Link, useNavigate } from "react-router-dom";
-import type { User } from "src/types/user.ts";
 import { API } from "src/api";
+import { useAtom } from "jotai";
+import { userAtom } from "src/store/user.ts";
+import { authAtom } from "src/store/auth.ts";
 
-interface HeaderProps {
-  user?: User;
-}
-
-export const Header: React.FC<HeaderProps> = ({ user }) => {
+export const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [user] = useAtom(userAtom);
   const menuRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const [, setAuth] = useAtom(authAtom);
+  const [, setUser] = useAtom(userAtom);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -24,7 +25,13 @@ export const Header: React.FC<HeaderProps> = ({ user }) => {
   }, []);
 
   const onLogout = () => {
-    API.auth.logout().then(() => navigate("/login"));
+    setMenuOpen(false);
+
+    API.auth.logout().then(() => {
+      setAuth((prev) => ({ ...prev, isLoggedIn: false }));
+      setUser(null);
+      navigate("/login");
+    });
   };
 
   return (
@@ -33,21 +40,23 @@ export const Header: React.FC<HeaderProps> = ({ user }) => {
         🎮 MiniGames
       </Link>
 
-      <div className={styles.user} ref={menuRef}>
-        <span className={styles.username}>{user?.email}</span>
-        <img
-          src="https://picsum.photos/300/300"
-          alt="avatar"
-          className={styles.avatar}
-          onClick={() => setMenuOpen(!menuOpen)}
-        />
-        {menuOpen && (
-          <div className={styles.dropdown}>
-            <button onClick={() => {}}>Профиль</button>
-            <button onClick={onLogout}>Выйти</button>
-          </div>
-        )}
-      </div>
+      {user && (
+        <div className={styles.user} ref={menuRef}>
+          <span className={styles.username}>{user.email}</span>
+          <img
+            src={user.avatarUrl}
+            alt="avatar"
+            className={styles.avatar}
+            onClick={() => setMenuOpen(!menuOpen)}
+          />
+          {menuOpen && (
+            <div className={styles.dropdown}>
+              <button onClick={() => {}}>Профиль</button>
+              <button onClick={onLogout}>Выйти</button>
+            </div>
+          )}
+        </div>
+      )}
     </header>
   );
 };

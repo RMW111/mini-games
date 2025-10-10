@@ -26,12 +26,12 @@ const RegistrationPage = () => {
       const image = await fetch("https://picsum.photos/300/300").then((response) => response);
       console.log("image:", image.url);
 
-      // await API.auth.register({ email, password });
-      // setSuccess("Вы успешно зарегистрированы!");
-      // setEmail("");
-      // setPassword("");
-      // setConfirmPassword("");
-      // navigate("/games");
+      await API.auth.register({ email, password, avatarUrl: image.url });
+      setSuccess("Вы успешно зарегистрированы!");
+      setEmail("");
+      setPassword("");
+      setConfirmPassword("");
+      navigate("/games");
     } catch (err) {
       if (isAxiosError(err) && err.response) {
         setError(err.response.data.message || "Произошла ошибка при регистрации.");
