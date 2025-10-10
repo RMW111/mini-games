@@ -28,7 +28,6 @@ pub async fn ws_handler(
     Path(session_id): Path<Uuid>,
     user: User,
 ) -> Response {
-    println!("In ws_handler");
     let is_participant_result = sqlx::query_scalar!(
         "SELECT EXISTS(SELECT 1 FROM session_participants WHERE session_id = $1 AND user_id = $2)",
         session_id,

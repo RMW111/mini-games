@@ -20,9 +20,10 @@ pub async fn register(
         .to_string();
 
     sqlx::query!(
-        r#"INSERT INTO users (email, password_hash) VALUES ($1, $2)"#,
+        r#"INSERT INTO users (email, password_hash, avatar_url) VALUES ($1, $2, $3)"#,
         payload.email,
         password_hash,
+        payload.avatar_url
     )
     .execute(&pool)
     .await?;

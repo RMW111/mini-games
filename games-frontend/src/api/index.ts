@@ -4,6 +4,7 @@ import type { DefaultBackendResponse } from "src/types/defaultBackendResponse.ts
 import type { AuthReq } from "src/api/dtos/auth.ts";
 import type { GameInfo } from "src/types/game.ts";
 import type { CreateSessionReq, CreateSessionRes } from "src/api/dtos/session.ts";
+import type { User } from "src/types/user.ts";
 
 export const API = {
   auth: {
@@ -19,5 +20,5 @@ export const API = {
     createNew: POST<CreateSessionReq, CreateSessionRes>(`sessions/new`),
     join: (sessionId: string) => POST(`sessions/${sessionId}/join`),
   },
-  getUserInfo: GET("me"),
+  getUserInfo: GET<User>("me"),
 };
