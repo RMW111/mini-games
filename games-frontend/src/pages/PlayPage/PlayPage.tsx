@@ -31,8 +31,10 @@ export const PlayPage = () => {
   >({});
 
   const updateMousePositionThrottled = useThrottledCallback((position: Position) => {
-    const cursorMsg = createCursorWsMsg(ClientCursorMsgType.Move, position);
-    sendCursorMsg(cursorMsg);
+    if (session!.participants.length > 1) {
+      const cursorMsg = createCursorWsMsg(ClientCursorMsgType.Move, position);
+      sendCursorMsg(cursorMsg);
+    }
   }, 33);
 
   useEffect(() => {
