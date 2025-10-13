@@ -1,7 +1,7 @@
 use sqlx::postgres::{PgPool, PgPoolOptions};
 use std::env;
 use std::time::Duration;
-use tracing::error; // <-- Добавьте это
+use tracing::error;
 
 pub async fn create_pg_pull() -> PgPool {
     let db_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
@@ -9,7 +9,6 @@ pub async fn create_pg_pull() -> PgPool {
     let pool_options = PgPoolOptions::new()
         .max_connections(10)
         .min_connections(1)
-        // УВЕЛИЧИМ ТАЙМАУТ до 30 секунд
         .acquire_timeout(Duration::from_secs(30))
         .max_lifetime(Duration::from_secs(1800))
         .idle_timeout(Duration::from_secs(600))
