@@ -1,13 +1,13 @@
+use crate::db::create_pg_pool;
 use tokio::net::TcpListener;
-use crate::db::create_pg_pull;
 
 mod app;
+mod app_state;
 mod db;
+mod features;
+mod games;
 mod models;
 mod utils;
-mod features;
-mod app_state;
-mod games;
 
 #[tokio::main]
 async fn main() {
@@ -18,7 +18,7 @@ async fn main() {
     #[cfg(debug_assertions)]
     dotenvy::dotenv().ok();
 
-    let pull = create_pg_pull().await;
+    let pull = create_pg_pool().await;
     let app = app::create_app(pull);
     let addr = "127.0.0.1:8080";
     let listener = TcpListener::bind(addr).await.unwrap();
