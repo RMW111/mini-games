@@ -1,14 +1,14 @@
 use crate::app_state::{DatabaseConnection, WsConnections};
+use crate::features::sessions::dtos::participant::ParticipantDTO;
+use crate::features::sessions::models::ws_messages::{ServerMessage, SessionMessage};
+use crate::features::sessions::utils::broadcast_to_session::broadcast_to_session;
 use crate::models::app_error::AppError;
+use crate::models::participant::ParticipantRole;
 use crate::models::user::User;
 use axum::extract::Path;
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use uuid::Uuid;
-use crate::features::sessions::dtos::participant::ParticipantDTO;
-use crate::features::sessions::models::ws_messages::{ServerMessage, SessionMessage};
-use crate::features::sessions::utils::broadcast_to_session::broadcast_to_session;
-use crate::models::participant::ParticipantRole;
 
 pub async fn join_session(
     DatabaseConnection(pool): DatabaseConnection,
@@ -49,7 +49,7 @@ pub async fn join_session(
                 participant: new_participant,
             });
 
-            broadcast_to_session(&mut live_session, &message).await;
+            broadcast_to_session(&mut live_session, &message, None).await;
         }
     }
 

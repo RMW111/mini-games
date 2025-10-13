@@ -1,7 +1,8 @@
-use serde::Serialize;
 use crate::features::sessions::dtos::participant::ParticipantDTO;
 use crate::features::sessions::dtos::session::SessionDTO;
+use crate::models::cursor::MovePayload;
 use crate::models::session::SessionStatus;
+use serde::Serialize;
 
 #[derive(Serialize, Debug, Clone)]
 #[serde(tag = "type", content = "payload", rename_all = "camelCase")]
@@ -22,7 +23,14 @@ pub enum SessionMessage {
 
 #[derive(Serialize, Debug, Clone)]
 #[serde(tag = "type", content = "payload", rename_all = "camelCase")]
+pub enum CursorMessage {
+    Move(MovePayload),
+}
+
+#[derive(Serialize, Debug, Clone)]
+#[serde(tag = "type", content = "payload", rename_all = "camelCase")]
 pub enum ServerMessage {
     Session(SessionMessage),
+    Cursor(CursorMessage),
     // Game(GameMessage),
 }

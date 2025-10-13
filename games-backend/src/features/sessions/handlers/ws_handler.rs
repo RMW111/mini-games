@@ -1,9 +1,14 @@
 use crate::app_state::{DatabaseConnection, WsConnections};
 use crate::features::sessions::dtos::session::SessionDTO;
 use crate::features::sessions::models::handler_data::HandlerData;
-use crate::features::sessions::models::session_connections::{LiveSession, SessionConnections};
-use crate::features::sessions::models::ws_client_messages::{ClientMessage, GameClientMessage};
+use crate::features::sessions::models::session_connections::{
+    ConnectionInfo, LiveSession, SessionConnections,
+};
+use crate::features::sessions::models::ws_client_messages::{
+    ClientMessage, CursorClientMessage, GameClientMessage,
+};
 use crate::features::sessions::models::ws_messages::{ServerMessage, SessionMessage};
+use crate::features::sessions::utils::handle_cursor_move_message::handle_cursor_move_message;
 use crate::features::sessions::utils::load_session_with_participants::load_session_with_participants;
 use crate::games::minesweeper::utils::handle_message::handle_minesweeper_message;
 use crate::models::app_error::AppError;
@@ -114,7 +119,13 @@ async fn handle_socket(
             return;
         }
 
-        live_session.connections.insert(connection_id, sender);
+        live_session.connections.insert(
+            connection_id,
+            ConnectionInfo {
+                sender,
+                user_id: user.id,
+            },
+        );
         println!(
             "User '{}' successfully joined live session {}.",
             user.email, session_id
@@ -127,10 +138,10 @@ async fn handle_socket(
         tokio::select! {
             _ = heartbeat_interval.tick() => {
                 let mut live_session = live_session_arc.lock().await;
-                if let Some(sender) = live_session.connections.get_mut(&connection_id) {
+                if let Some(connection_info) = live_session.connections.get_mut(&connection_id) {
                     println!("Sending PING to connection {}", connection_id);
 
-                    if sender.send(Message::Ping(Bytes::new())).await.is_err() {
+                    if connection_info.sender.send(Message::Ping(Bytes::new())).await.is_err() {
                         println!("Failed to send ping to conn_id {}, connection is likely closed.", connection_id);
                         break;
                     }
@@ -156,16 +167,16 @@ async fn handle_socket(
                         Ok(message) => {
                             let mut live_session = live_session_arc.lock().await;
                             if live_session.session_state.status != SessionStatus::InProgress {
-                                if let Some(sender) = live_session.connections.get_mut(&connection_id) {
-                                    let _ = sender.send(Message::Close(None)).await;
+                                if let Some(connection_info) = live_session.connections.get_mut(&connection_id) {
+                                    let _ = connection_info.sender.send(Message::Close(None)).await;
                                 }
                                 break;
                             }
 
                             let handler_data = HandlerData {
                                 pool: pool.clone(),
+                                user: user.clone(),
                                 // connection_id,
-                                // user: user.clone(),
                             };
 
                             handle_client_message(message, &mut live_session, handler_data).await;
@@ -208,6 +219,9 @@ async fn handle_client_message(
         ClientMessage::Game(game_message) => {
             handle_game_message(game_message, live_session, handler_data).await
         }
+        ClientMessage::Cursor(cursor_message) => {
+            handle_cursor_message(cursor_message, live_session, handler_data).await
+        }
     };
 }
 
@@ -219,6 +233,18 @@ async fn handle_game_message(
     match message {
         GameClientMessage::Minesweeper(message) => {
             handle_minesweeper_message(message, live_session, handler_data).await
+        }
+    };
+}
+
+async fn handle_cursor_message(
+    message: CursorClientMessage,
+    live_session: &mut LiveSession,
+    handler_data: HandlerData,
+) {
+    match message {
+        CursorClientMessage::Move(position) => {
+            handle_cursor_move_message(position, live_session, handler_data).await
         }
     };
 }

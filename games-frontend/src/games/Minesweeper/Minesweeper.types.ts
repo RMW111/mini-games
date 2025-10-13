@@ -1,7 +1,4 @@
-export enum MinesweeperMsg {
-  CellClick = "cellClick",
-  CellFlag = "cellFlag",
-}
+import type { WSMsg } from "src/types/WSMsg.ts";
 
 export interface GameState {
   board: {
@@ -17,6 +14,11 @@ export interface Cell {
   minesAround: number;
 }
 
+export interface CellPos {
+  row: number;
+  col: number;
+}
+
 export enum CellState {
   Closed = "closed",
   Opened = "opened",
@@ -24,3 +26,14 @@ export enum CellState {
   Exploded = "exploded",
   Pending = "pending",
 }
+
+export enum MinesweeperMsgType {
+  CellClick = "cellClick",
+  CellFlag = "cellFlag",
+}
+
+export type MinesweeperMsg =
+  | WSMsg<MinesweeperMsgType.CellClick, CellPos>
+  | WSMsg<MinesweeperMsgType.CellFlag, CellPos>;
+
+export type MinesweeperMsgPayload = CellPos;

@@ -3,15 +3,15 @@ import { type Session, SessionStatus } from "src/types/session.ts";
 import {
   CellState,
   type GameState,
-  MinesweeperMsg,
+  MinesweeperMsgType,
 } from "src/games/Minesweeper/Minesweeper.types.ts";
 import { type RefObject, useMemo, useState } from "react";
 import { Cell } from "src/games/Minesweeper/components/Cell/Cell.tsx";
-import { useGameWS } from "src/hooks/useGameWS.ts";
+import { useSessionWS } from "src/hooks/useSessionWS.ts";
 import { GameSlug } from "src/types/game.ts";
-import { createWsMessage } from "src/utils/createWsMessage.ts";
 import { API } from "src/api";
 import { useNavigate, useParams } from "react-router-dom";
+import { createMinesweeperWsMsg } from "src/games/Minesweeper/Minesweeper.utils.ts";
 
 interface Props {
   socket: RefObject<WebSocket>;
@@ -22,13 +22,13 @@ export const Minesweeper = ({ socket, session }: Props) => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const { sendGameMsg } = useGameWS(socket.current, GameSlug.Minesweeper);
+  const { sendGameMsg } = useSessionWS(socket.current, GameSlug.Minesweeper);
 
   const onCellClick = (rowIndex: number, cellIndex: number) => {
     const cell = session.gameState.board.grid[rowIndex][cellIndex];
 
     if (cell.state === CellState.Closed) {
-      const message = createWsMessage(MinesweeperMsg.CellClick, {
+      const message = createMinesweeperWsMsg(MinesweeperMsgType.CellClick, {
         row: rowIndex,
         col: cellIndex,
       });
@@ -37,7 +37,7 @@ export const Minesweeper = ({ socket, session }: Props) => {
   };
 
   const onCellFlagged = (rowIndex: number, cellIndex: number) => {
-    const message = createWsMessage(MinesweeperMsg.CellFlag, {
+    const message = createMinesweeperWsMsg(MinesweeperMsgType.CellFlag, {
       row: rowIndex,
       col: cellIndex,
     });

@@ -43,8 +43,24 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route path="/games/:slug" element={<GameLobbyPage />} />
-        <Route path="/play/:slug/:sessionId" element={<PlayPage />} />
+
+        <Route
+          path="/games/:slug"
+          element={
+            <ProtectedRoute>
+              <GameLobbyPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/play/:slug/:sessionId"
+          element={
+            <ProtectedRoute>
+              <PlayPage />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </>
   );

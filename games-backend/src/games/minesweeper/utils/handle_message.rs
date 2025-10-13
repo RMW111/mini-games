@@ -118,6 +118,6 @@ pub async fn process_minesweeper_action<F>(
     });
 
     for message in messages_to_broadcast {
-        broadcast_to_session(live_session, &message).await;
+        broadcast_to_session(live_session, &message, None).await;
     }
 }
