@@ -38,7 +38,10 @@ export const PlayPage = () => {
   }, 33);
 
   useEffect(() => {
-    const baseUrl = import.meta.env.DEV ? "ws://localhost:8080" : `wss://${window.location.host}`;
+    const protocol = window.location.protocol === "https:" ? "wss" : "ws";
+    const baseUrl = import.meta.env.DEV
+      ? "ws://localhost:8080"
+      : `${protocol}://${window.location.host}`;
     const newSocket = new WebSocket(`${baseUrl}/ws/sessions/${sessionId}`);
 
     newSocket.onmessage = (event) => {
