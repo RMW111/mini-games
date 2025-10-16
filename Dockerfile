@@ -47,7 +47,7 @@ COPY games-frontend/nginx/nginx.conf /etc/nginx/nginx.conf
 
 COPY --from=backend-builder /app/games-backend/target/release/games-backend /usr/local/bin/games-backend
 
-EXPOSE 10000
+EXPOSE 80
 
 COPY start.sh /start.sh
 RUN chmod +x /start.sh
