@@ -1,7 +1,7 @@
 # Dockerfile
 
 # --- ЭТАП 1: Сборка React-приложения ---
-FROM node:20.12.2-alpine3.19 AS frontend-builder
+FROM node:alpine AS frontend-builder
 WORKDIR /app/games-frontend
 COPY games-frontend/package*.json ./
 RUN npm install
@@ -10,7 +10,7 @@ RUN npm run build
 
 
 # --- ЭТАП 2: Сборка Rust-бэкенда ---
-FROM rust:1.84.1-alpine3.19 AS backend-builder
+FROM rust:alpine3.22 AS backend-builder
 RUN apk --no-cache add build-base ca-certificates
 WORKDIR /app/games-backend
 
@@ -39,7 +39,7 @@ RUN cargo build --release --locked
 
 
 # --- ЭТАП 3: Создание финального образа ---
-FROM nginx:1.25.3-alpine3.19
+FROM nginx:alpine
 RUN apk --no-cache add ca-certificates
 
 COPY --from=frontend-builder /app/games-frontend/dist /usr/share/nginx/html
