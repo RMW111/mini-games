@@ -14,13 +14,14 @@ use crate::games::minesweeper::utils::handle_message::handle_minesweeper_message
 use crate::models::app_error::AppError;
 use crate::models::session::SessionStatus;
 use crate::models::user::User;
-use axum::extract::ws::{Message, WebSocket};
+use axum::extract::ws::{CloseFrame, Message, WebSocket};
 use axum::extract::{Path, WebSocketUpgrade};
 use axum::response::{IntoResponse, Response};
 use bytes::Bytes;
 use futures::SinkExt;
 use futures::StreamExt;
 use sqlx::PgPool;
+use std::borrow::Cow;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use tokio::time::Duration;
@@ -116,6 +117,11 @@ async fn handle_socket(
         }
 
         if live_session.session_state.status == SessionStatus::Completed {
+            let close_frame = CloseFrame {
+                code: 1000,
+                reason: "Session has already been completed.".into(),
+            };
+            let _ = sender.send(Message::Close(Some(close_frame))).await;
             return;
         }
 

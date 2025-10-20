@@ -69,7 +69,7 @@ export const PlayPage = () => {
 
       newSocket.onclose = (event) => {
         console.log("WebSocket Connection Closed:", event.code, event.reason);
-        if (reconnectTrys.current < MAX_RECONNECT_TRYS) {
+        if (event.code === 1006 && reconnectTrys.current < MAX_RECONNECT_TRYS) {
           const timeout = reconnectTrys.current * reconnectTrys.current;
           console.log(`Attempting to reconnect in ${timeout} seconds...`);
           reconnectTrys.current = reconnectTrys.current + 1;
