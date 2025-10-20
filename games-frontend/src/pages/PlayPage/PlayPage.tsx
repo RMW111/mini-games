@@ -69,6 +69,7 @@ export const PlayPage = () => {
         console.log("WebSocket Connection Closed:", event.code, event.reason);
 
         console.log(`Attempting to reconnect in ${RECONNECT_TIMEOUT / 1000} seconds...`);
+        connect();
         reconnectTimeoutId.current = window.setTimeout(connect, RECONNECT_TIMEOUT);
       };
 
