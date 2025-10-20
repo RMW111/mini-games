@@ -68,17 +68,16 @@ export const PlayPage = () => {
 
       newSocket.onclose = (event) => {
         console.log("WebSocket Connection Closed:", event.code, event.reason);
-      };
-
-      newSocket.onerror = (error) => {
-        console.error("WebSocket Error:", error);
-
         if (reconnectTrys.current < MAX_RECONNECT_TRYS) {
           const timeout = reconnectTrys.current * reconnectTrys.current;
           console.log(`Attempting to reconnect in ${timeout} seconds...`);
           reconnectTrys.current = reconnectTrys.current + 1;
           reconnectTimeoutId.current = window.setTimeout(connect, timeout * 1000);
         }
+      };
+
+      newSocket.onerror = (error) => {
+        console.error("WebSocket Error:", error);
       };
 
       socket.current = newSocket;
@@ -91,7 +90,8 @@ export const PlayPage = () => {
         clearTimeout(reconnectTimeoutId.current);
       }
       if (socket.current) {
-        socket.current.close();
+        socket.current.onclose = null;
+        socket.current.close(1000, "User changed session");
       }
     };
   }, [sessionId]);
@@ -158,8 +158,6 @@ export const PlayPage = () => {
   const cursors = Object.entries(userCursorsPositions).map(([userId, position], index) => {
     return <Cursor key={userId} positionRef={position} color={cursorColors[index]} />;
   });
-
-  console.log("userCursorsPositions:", userCursorsPositions);
 
   return (
     <Container className={styles.container}>
