@@ -1,54 +1,71 @@
-# Dockerfile
+# syntax=docker/dockerfile:1.6
+# ↑ обязательно для BuildKit и мультиконтекстных COPY
 
-# --- ЭТАП 1: Сборка React-приложения ---
-FROM node:alpine AS frontend-builder
-WORKDIR /app/games-frontend
-COPY games-frontend/package*.json ./
-RUN npm install
-COPY games-frontend/ .
+#############################################
+# === ЭТАП 1: Сборка React фронтенда ===
+#############################################
+FROM node:20-alpine3.18 AS frontend-builder
+
+WORKDIR /app
+
+# Копируем package.json и lock-файл из контекста "games-frontend"
+COPY --from=games-frontend package*.json ./
+RUN npm ci
+
+# Копируем остальной код фронта
+COPY --from=games-frontend . .
+
 RUN npm run build
 
 
-# --- ЭТАП 2: Сборка Rust-бэкенда ---
+
+#############################################
+# === ЭТАП 2: Сборка Rust бэкенда ===
+#############################################
 FROM rust:alpine3.22 AS backend-builder
 RUN apk --no-cache add build-base ca-certificates
-WORKDIR /app/games-backend
 
-# 1. Копируем только манифесты.
-COPY games-backend/Cargo.toml games-backend/Cargo.lock ./
+WORKDIR /app
 
-# 2. Создаем ПУСТУЮ БИБЛИОТЕКУ.
-# Cargo скомпилирует зависимости, но НЕ СОЗДАСТ исполняемый файл.
+# Копируем Cargo.toml и Cargo.lock
+COPY --from=games-backend Cargo.toml Cargo.lock ./
+
+# Сборка зависимостей (фейковый src, чтобы кэшировать)
 RUN mkdir src && echo "pub fn dummy() {}" > src/lib.rs
-
-# 3. Собираем зависимости. Исполняемый файл 'games-backend' НЕ создается.
 RUN cargo build --release --locked
+RUN rm -rf src
 
-# 4. Удаляем временную библиотеку.
-RUN rm -f src/lib.rs
-
-# 5. Теперь копируем наш настоящий исходный код (с main.rs) и данные sqlx.
-COPY games-backend/src ./src
-COPY games-backend/.sqlx ./.sqlx
-
-# 6. Собираем финальный бинарный файл.
-# Cargo видит main.rs и теперь ОБЯЗАН создать исполняемый файл.
-# Все зависимости уже в кэше, поэтому этот шаг будет очень быстрым.
+# Копируем реальный код и собираем приложение
+COPY --from=games-backend src ./src
+COPY --from=games-backend .sqlx ./.sqlx
 ENV SQLX_OFFLINE=true
 RUN cargo build --release --locked
 
 
-# --- ЭТАП 3: Создание финального образа ---
-FROM nginx:alpine
+
+#############################################
+# === ЭТАП 3: Финальный образ ===
+#############################################
+FROM nginx:1.26-alpine
+
+WORKDIR /app
+
+# Добавляем сертификаты
 RUN apk --no-cache add ca-certificates
 
-COPY --from=frontend-builder /app/games-frontend/dist /usr/share/nginx/html
-COPY games-frontend/nginx/nginx.conf /etc/nginx/nginx.conf
+# Копируем собранный фронт
+COPY --from=frontend-builder /app/dist /usr/share/nginx/html
 
-COPY --from=backend-builder /app/games-backend/target/release/games-backend /usr/local/bin/games-backend
+# Копируем nginx-конфиг
+COPY --from=games-frontend nginx/nginx.conf /etc/nginx/nginx.conf
 
+# Копируем бинарь бэкенда
+COPY --from=backend-builder /app/target/release/games-backend /usr/local/bin/games-backend
+
+# Порт
 EXPOSE 80
 
+# Скрипт запуска
 COPY start.sh /start.sh
 RUN chmod +x /start.sh
 

@@ -38,3 +38,14 @@
 .idea\dataSources
 .idea\dataSources.local.xml
 fly.toml
+
+games-frontend/node_modules
+**/node_modules
+
+games-frontend/dist
+games-frontend/build
+games-backend/target
+
+.git
+.gitignore
+README.md

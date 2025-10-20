@@ -1,0 +1,18 @@
+{
+  "group": {
+    "default": {
+      "targets": ["games-app"]
+    }
+  },
+  "target": {
+    "games-app": {
+      "context": ".",
+      "dockerfile": "Dockerfile",
+      "tags": ["games-app:latest"],
+      "contexts": {
+        "games-frontend": "./games-frontend",
+        "games-backend": "./games-backend"
+      }
+    }
+  }
+}
