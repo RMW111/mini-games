@@ -1,5 +1,6 @@
 services:
   - type: web
+    name: mini-games-2
     env: docker
     buildCommand: "docker buildx bake"
     dockerfilePath: ./Dockerfile
