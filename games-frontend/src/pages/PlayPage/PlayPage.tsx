@@ -16,7 +16,7 @@ import { ClientCursorMsgType } from "src/types/clientCursorMsg.ts";
 import { type ServerCursorMsg, ServerCursorMsgType } from "src/types/serverCursorMsg.ts";
 import { Container } from "src/components/layout/Container/Container.tsx";
 
-const RECONNECT_TIMEOUT = 10_000;
+const MAX_RECONNECT_TRYS = 5;
 
 export const PlayPage = () => {
   const { slug = GameSlug.Minesweeper, sessionId = "" } = useParams<{
@@ -29,6 +29,7 @@ export const PlayPage = () => {
   const reconnectTimeoutId = useRef<number | null>(null); // Для хранения ID таймаута
   const { sendCursorMsg } = useSessionWS(socket.current, slug);
   const [session, setSession] = useState<Session>();
+  const reconnectTrys = useRef(0);
   const [userCursorsPositions, setUserCursorsPositions] = useState<
     Record<string, RefObject<Position>>
   >({});
@@ -67,14 +68,17 @@ export const PlayPage = () => {
 
       newSocket.onclose = (event) => {
         console.log("WebSocket Connection Closed:", event.code, event.reason);
-
-        console.log(`Attempting to reconnect in ${RECONNECT_TIMEOUT / 1000} seconds...`);
-        connect();
-        reconnectTimeoutId.current = window.setTimeout(connect, RECONNECT_TIMEOUT);
       };
 
       newSocket.onerror = (error) => {
         console.error("WebSocket Error:", error);
+
+        if (reconnectTrys.current < MAX_RECONNECT_TRYS) {
+          const timeout = reconnectTrys.current * reconnectTrys.current;
+          console.log(`Attempting to reconnect in ${timeout} seconds...`);
+          reconnectTrys.current = reconnectTrys.current + 1;
+          reconnectTimeoutId.current = window.setTimeout(connect, timeout * 1000);
+        }
       };
 
       socket.current = newSocket;
