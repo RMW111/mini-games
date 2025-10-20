@@ -1,5 +1,11 @@
 # syntax=docker/dockerfile:1.6
-# ↑ обязательно для BuildKit и мультиконтекстных COPY
+
+# --- Виртуальные этапы для импорта контекстов ---
+# Этот этап просто делает файлы из контекста "games-frontend" доступными под именем "fe-src"
+FROM games-frontend AS fe-src
+# Аналогично для бэкенда
+FROM games-backend AS be-src
+
 
 #############################################
 # === ЭТАП 1: Сборка React фронтенда ===
@@ -8,15 +14,13 @@ FROM node:20-alpine3.18 AS frontend-builder
 
 WORKDIR /app
 
-# Копируем package.json и lock-файл из контекста "games-frontend"
-COPY --from=games-frontend package*.json ./
+# Теперь мы копируем из четко определенного этапа "fe-src"
+COPY --from=fe-src package*.json ./
 RUN npm ci
 
 # Копируем остальной код фронта
-COPY --from=games-frontend . .
-
+COPY --from=fe-src . .
 RUN npm run build
-
 
 
 #############################################
@@ -27,8 +31,8 @@ RUN apk --no-cache add build-base ca-certificates
 
 WORKDIR /app
 
-# Копируем Cargo.toml и Cargo.lock
-COPY --from=games-backend Cargo.toml Cargo.lock ./
+# Копируем из этапа "be-src"
+COPY --from=be-src Cargo.toml Cargo.lock ./
 
 # Сборка зависимостей (фейковый src, чтобы кэшировать)
 RUN mkdir src && echo "pub fn dummy() {}" > src/lib.rs
@@ -36,11 +40,10 @@ RUN cargo build --release --locked
 RUN rm -rf src
 
 # Копируем реальный код и собираем приложение
-COPY --from=games-backend src ./src
-COPY --from=games-backend .sqlx ./.sqlx
+COPY --from=be-src src ./src
+COPY --from=be-src .sqlx ./.sqlx
 ENV SQLX_OFFLINE=true
 RUN cargo build --release --locked
-
 
 
 #############################################
@@ -53,13 +56,13 @@ WORKDIR /app
 # Добавляем сертификаты
 RUN apk --no-cache add ca-certificates
 
-# Копируем собранный фронт
+# Копируем собранный фронт из этапа frontend-builder
 COPY --from=frontend-builder /app/dist /usr/share/nginx/html
 
-# Копируем nginx-конфиг
-COPY --from=games-frontend nginx/nginx.conf /etc/nginx/nginx.conf
+# Копируем nginx-конфиг из контекста фронтенда (через этап fe-src)
+COPY --from=fe-src nginx/nginx.conf /etc/nginx/nginx.conf
 
-# Копируем бинарь бэкенда
+# Копируем бинарь бэкенда из этапа backend-builder
 COPY --from=backend-builder /app/target/release/games-backend /usr/local/bin/games-backend
 
 # Порт
