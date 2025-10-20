@@ -27,7 +27,6 @@ export const PlayPage = () => {
   const GameComponent = gamesComponents[slug] || null;
   const socket = useRef<WebSocket | null>(null);
   const reconnectTimeoutId = useRef<number | null>(null); // Для хранения ID таймаута
-  const [isConnected, setIsConnected] = useState(false);
   const { sendCursorMsg } = useSessionWS(socket.current, slug);
   const [session, setSession] = useState<Session>();
   const [userCursorsPositions, setUserCursorsPositions] = useState<
@@ -51,7 +50,6 @@ export const PlayPage = () => {
 
       newSocket.onopen = () => {
         console.log("WebSocket Connection Opened");
-        setIsConnected(true);
         if (reconnectTimeoutId.current) {
           clearTimeout(reconnectTimeoutId.current);
         }
@@ -69,7 +67,6 @@ export const PlayPage = () => {
 
       newSocket.onclose = (event) => {
         console.log("WebSocket Connection Closed:", event.code, event.reason);
-        setIsConnected(false);
 
         console.log(`Attempting to reconnect in ${RECONNECT_TIMEOUT / 1000} seconds...`);
         reconnectTimeoutId.current = window.setTimeout(connect, RECONNECT_TIMEOUT);
