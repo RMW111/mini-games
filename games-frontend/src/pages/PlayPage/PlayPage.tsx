@@ -16,6 +16,8 @@ import { ClientCursorMsgType } from "src/types/clientCursorMsg.ts";
 import { type ServerCursorMsg, ServerCursorMsgType } from "src/types/serverCursorMsg.ts";
 import { Container } from "src/components/layout/Container/Container.tsx";
 
+const RECONNECT_TIMEOUT = 10_000;
+
 export const PlayPage = () => {
   const { slug = GameSlug.Minesweeper, sessionId = "" } = useParams<{
     slug: GameSlug;
@@ -24,6 +26,8 @@ export const PlayPage = () => {
   const gameAreaRef = useRef<HTMLDivElement>(null);
   const GameComponent = gamesComponents[slug] || null;
   const socket = useRef<WebSocket | null>(null);
+  const reconnectTimeoutId = useRef<number | null>(null); // Для хранения ID таймаута
+  const [isConnected, setIsConnected] = useState(false);
   const { sendCursorMsg } = useSessionWS(socket.current, slug);
   const [session, setSession] = useState<Session>();
   const [userCursorsPositions, setUserCursorsPositions] = useState<
@@ -38,33 +42,56 @@ export const PlayPage = () => {
   }, 33);
 
   useEffect(() => {
-    const protocol = window.location.protocol === "https:" ? "wss" : "ws";
-    const baseUrl = import.meta.env.DEV
-      ? "ws://localhost:8080"
-      : `${protocol}://${window.location.host}`;
-    const newSocket = new WebSocket(`${baseUrl}/ws/sessions/${sessionId}`);
+    const connect = () => {
+      const protocol = window.location.protocol === "https:" ? "wss" : "ws";
+      const baseUrl = import.meta.env.DEV
+        ? "ws://localhost:8080"
+        : `${protocol}://${window.location.host}`;
+      const newSocket = new WebSocket(`${baseUrl}/ws/sessions/${sessionId}`);
 
-    newSocket.onmessage = (event) => {
-      try {
-        const parsedMessage: ServerMsg = JSON.parse(event.data);
-        console.log("parsedMessage:", parsedMessage);
-        handleSocketMessage(parsedMessage);
-      } catch (error) {
-        console.error("Failed to parse server message:", error);
+      newSocket.onopen = () => {
+        console.log("WebSocket Connection Opened");
+        setIsConnected(true);
+        if (reconnectTimeoutId.current) {
+          clearTimeout(reconnectTimeoutId.current);
+        }
+      };
+
+      newSocket.onmessage = (event) => {
+        try {
+          const parsedMessage: ServerMsg = JSON.parse(event.data);
+          console.log("parsedMessage:", parsedMessage);
+          handleSocketMessage(parsedMessage);
+        } catch (error) {
+          console.error("Failed to parse server message:", error);
+        }
+      };
+
+      newSocket.onclose = (event) => {
+        console.log("WebSocket Connection Closed:", event.code, event.reason);
+        setIsConnected(false);
+
+        console.log(`Attempting to reconnect in ${RECONNECT_TIMEOUT / 1000} seconds...`);
+        reconnectTimeoutId.current = window.setTimeout(connect, RECONNECT_TIMEOUT);
+      };
+
+      newSocket.onerror = (error) => {
+        console.error("WebSocket Error:", error);
+      };
+
+      socket.current = newSocket;
+    };
+
+    connect();
+
+    return () => {
+      if (reconnectTimeoutId.current) {
+        clearTimeout(reconnectTimeoutId.current);
+      }
+      if (socket.current) {
+        socket.current.close();
       }
     };
-
-    newSocket.onclose = (event) => {
-      console.log("WebSocket Connection Closed:", event.code, event.reason);
-    };
-
-    newSocket.onerror = (error) => {
-      console.error("WebSocket Error:", error);
-    };
-
-    socket.current = newSocket;
-
-    return () => newSocket.close();
   }, [sessionId]);
 
   const handleSocketMessage = (event: ServerMsg) => {
