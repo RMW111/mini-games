@@ -51,6 +51,7 @@ export const PlayPage = () => {
 
       newSocket.onopen = () => {
         console.log("WebSocket Connection Opened");
+        reconnectTrys.current = 0;
         if (reconnectTimeoutId.current) {
           clearTimeout(reconnectTimeoutId.current);
         }
