@@ -1,0 +1,6 @@
+services:
+  - type: web
+    env: docker
+    buildCommand: "docker buildx bake"
+    dockerfilePath: ./Dockerfile
+    startCommand: /start.sh
