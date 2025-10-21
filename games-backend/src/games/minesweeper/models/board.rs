@@ -51,7 +51,7 @@ impl Board {
         self.grid[row_index][col_index].toggle_flagged();
     }
 
-    pub fn on_num_click(&mut self, row: usize, col: usize) -> Option<()> {
+    pub fn on_num_click(&mut self, row: usize, col: usize) -> Option<bool> {
         if let Some(cell) = self.grid.get(row).and_then(|row| row.get(col)) {
             if cell.state != CellState::Opened || cell.mines_around < 1 {
                 return None;
@@ -87,18 +87,19 @@ impl Board {
 
             for (row, col) in adjacent_closed_coords {
                 let cell_to_open = self.get_cell_mut(row, col).unwrap();
-                cell_to_open.state = CellState::Opened;
+                cell_to_open.open_cell();
 
-                if cell_to_open.mines_around == 0 {
+                if cell_to_open.mines_around == 0 && !cell_to_open.has_mine {
                     self.reveal_area(row, col);
                 }
             }
 
             if has_mine_in_closed_cells {
                 self.reveal_closed_mines();
+                return Some(true);
             }
 
-            return Some(());
+            return Some(false);
         }
 
         None

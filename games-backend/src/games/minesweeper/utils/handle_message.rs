@@ -46,9 +46,16 @@ fn num_click_action(
             Err(_) => return messages_to_broadcast,
         };
 
-    if let Some(_) = game_state.board.on_num_click(payload.row, payload.col) {
+    if let Some(game_over) = game_state.board.on_num_click(payload.row, payload.col) {
         let new_state_json = serde_json::to_value(game_state).unwrap();
         live_session.session_state.game_state = new_state_json.clone();
+
+        if game_over {
+            live_session.session_state.status = SessionStatus::Completed;
+            let status_update_message = SessionMessage::StatusUpdate(SessionStatus::Completed);
+            messages_to_broadcast.push(ServerMessage::Session(status_update_message));
+        }
+
         let message = SessionMessage::GameStateUpdate(new_state_json);
         messages_to_broadcast.push(ServerMessage::Session(message));
     }
