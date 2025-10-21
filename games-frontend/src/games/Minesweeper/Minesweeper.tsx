@@ -27,11 +27,13 @@ export const Minesweeper = ({ socket, session }: Props) => {
   const onCellClick = (rowIndex: number, cellIndex: number) => {
     const cell = session.gameState.board.grid[rowIndex][cellIndex];
 
+    const payload = { row: rowIndex, col: cellIndex };
+
     if (cell.state === CellState.Closed) {
-      const message = createMinesweeperWsMsg(MinesweeperMsgType.CellClick, {
-        row: rowIndex,
-        col: cellIndex,
-      });
+      const message = createMinesweeperWsMsg(MinesweeperMsgType.CellClick, payload);
+      sendGameMsg(message);
+    } else if (cell.state === CellState.Opened && cell.minesAround > 0) {
+      const message = createMinesweeperWsMsg(MinesweeperMsgType.NumClick, payload);
       sendGameMsg(message);
     }
   };

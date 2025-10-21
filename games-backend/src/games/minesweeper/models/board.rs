@@ -88,6 +88,10 @@ impl Board {
             for (row, col) in adjacent_closed_coords {
                 let cell_to_open = self.get_cell_mut(row, col).unwrap();
                 cell_to_open.state = CellState::Opened;
+
+                if cell_to_open.mines_around == 0 {
+                    self.reveal_area(row, col);
+                }
             }
 
             if has_mine_in_closed_cells {

@@ -29,6 +29,7 @@ export enum CellState {
 
 export enum MinesweeperMsgType {
   CellClick = "cellClick",
+  NumClick = "numClick",
   CellFlag = "cellFlag",
 }
 
