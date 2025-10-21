@@ -25,7 +25,35 @@ pub async fn handle_minesweeper_message(
             })
             .await
         }
+        MinesweeperClientMessage::NumClick(payload) => {
+            process_minesweeper_action(live_session, handler_data, |live_session| {
+                num_click_action(live_session, payload)
+            })
+            .await
+        }
     };
+}
+
+fn num_click_action(
+    live_session: &mut LiveSession,
+    payload: ClickCellPayload,
+) -> Vec<ServerMessage> {
+    let mut messages_to_broadcast = vec![];
+
+    let mut game_state: MinesweeperState =
+        match serde_json::from_value(live_session.session_state.game_state.clone()) {
+            Ok(s) => s,
+            Err(_) => return messages_to_broadcast,
+        };
+
+    if let Some(_) = game_state.board.on_num_click(payload.row, payload.col) {
+        let new_state_json = serde_json::to_value(game_state).unwrap();
+        live_session.session_state.game_state = new_state_json.clone();
+        let message = SessionMessage::GameStateUpdate(new_state_json);
+        messages_to_broadcast.push(ServerMessage::Session(message));
+    }
+
+    messages_to_broadcast
 }
 
 fn cell_flag_action(

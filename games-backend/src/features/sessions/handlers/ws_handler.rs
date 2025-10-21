@@ -21,7 +21,6 @@ use bytes::Bytes;
 use futures::SinkExt;
 use futures::StreamExt;
 use sqlx::PgPool;
-use std::borrow::Cow;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use tokio::time::Duration;

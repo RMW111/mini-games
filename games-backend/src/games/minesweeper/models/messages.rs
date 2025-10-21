@@ -11,5 +11,6 @@ pub struct ClickCellPayload {
 #[serde(tag = "type", content = "payload", rename_all = "camelCase")]
 pub enum MinesweeperClientMessage {
     CellClick(ClickCellPayload),
+    NumClick(ClickCellPayload),
     CellFlag(ClickCellPayload),
 }
