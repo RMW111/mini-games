@@ -5,13 +5,18 @@ import {
   type GameState,
   MinesweeperMsgType,
 } from "src/games/Minesweeper/Minesweeper.types.ts";
-import { type RefObject, useMemo, useState } from "react";
+import { type RefObject, useEffect, useMemo, useState } from "react";
 import { Cell } from "src/games/Minesweeper/components/Cell/Cell.tsx";
 import { useSessionWS } from "src/hooks/useSessionWS.ts";
 import { GameSlug } from "src/types/game.ts";
 import { API } from "src/api";
 import { useNavigate, useParams } from "react-router-dom";
 import { createMinesweeperWsMsg } from "src/games/Minesweeper/Minesweeper.utils.ts";
+import { useAtom } from "jotai/index";
+import { userAtom } from "src/store/user.ts";
+import { ResultPopup } from "src/games/Minesweeper/components/ResultPopup/ResultPopup.tsx";
+import { Button } from "src/components/ui/Button/Button.tsx";
+import { participantsColors } from "src/pages/PlayPage/PlayPage.constants.tsx";
 
 interface Props {
   socket: RefObject<WebSocket>;
@@ -21,8 +26,14 @@ interface Props {
 export const Minesweeper = ({ socket, session }: Props) => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  const [user] = useAtom(userAtom);
   const [isLoading, setIsLoading] = useState(false);
   const { sendGameMsg } = useSessionWS(socket.current, GameSlug.Minesweeper);
+  const [isResultPopupOpened, setIsResultPopupOpened] = useState(false);
+
+  useEffect(() => {
+    setIsResultPopupOpened(session.status === SessionStatus.Completed);
+  }, [session.status]);
 
   const onCellClick = (rowIndex: number, cellIndex: number) => {
     const cell = session.gameState.board.grid[rowIndex][cellIndex];
@@ -39,6 +50,10 @@ export const Minesweeper = ({ socket, session }: Props) => {
   };
 
   const onCellFlagged = (rowIndex: number, cellIndex: number) => {
+    const cell = session.gameState.board.grid[rowIndex][cellIndex];
+
+    if (cell.flaggedBy && cell.flaggedBy !== user?.id) return;
+
     const message = createMinesweeperWsMsg(MinesweeperMsgType.CellFlag, {
       row: rowIndex,
       col: cellIndex,
@@ -46,16 +61,29 @@ export const Minesweeper = ({ socket, session }: Props) => {
     sendGameMsg(message);
   };
 
-  const cells = session.gameState.board.grid.map((row, rowIndex) => {
-    return row.map((cell, cellIndex) => (
-      <Cell
-        key={cellIndex}
-        isGameOver={session.status === SessionStatus.Completed}
-        cell={cell}
-        onClick={() => onCellClick(rowIndex, cellIndex)}
-        onFlagged={() => onCellFlagged(rowIndex, cellIndex)}
-      />
-    ));
+  const rows = session.gameState.board.grid.map((row, rowIndex) => {
+    return (
+      <div className={styles.row} key={rowIndex}>
+        {row.map((cell, cellIndex) => {
+          const participantIndex = session.participants.findIndex(
+            (x) => x.userId === cell.flaggedBy
+          );
+
+          const flagColor =
+            participantIndex > -1 ? participantsColors[participantIndex] : participantsColors[0];
+          return (
+            <Cell
+              key={cellIndex}
+              isGameOver={session.status === SessionStatus.Completed}
+              cell={cell}
+              onClick={() => onCellClick(rowIndex, cellIndex)}
+              onFlagged={() => onCellFlagged(rowIndex, cellIndex)}
+              flagColor={flagColor}
+            />
+          );
+        })}
+      </div>
+    );
   });
 
   const minesFlagged = useMemo(() => {
@@ -90,28 +118,26 @@ export const Minesweeper = ({ socket, session }: Props) => {
               🚩 {session.gameState.board.minesCount - minesFlagged}
             </span>
           </div>
-          <button
-            className={`${styles.resetButton} ${isLoading ? styles.loading : ""}`}
-            onClick={handleNewGame}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <>
-                <span className={styles.spinner}></span>
-                Создание...
-              </>
-            ) : (
-              "Новая игра"
-            )}
-          </button>
-          <div className={styles.hudItem}>
-            {/*<span className={styles.hudLabel}>Время</span>*/}
-            {/*<span className={styles.hudValue}>⏱️ 123</span>*/}
-          </div>
+
+          <Button isLoading={isLoading} onClick={handleNewGame}>
+            Новая игра
+          </Button>
+
+          <div className={styles.hudItem}></div>
         </div>
 
-        <div className={styles.board}>{cells}</div>
+        <div className={styles.board}>{rows}</div>
       </div>
+
+      {session.status === SessionStatus.Completed && (
+        <ResultPopup
+          isOpened={isResultPopupOpened}
+          isLoading={isLoading}
+          session={session}
+          onNewGameClick={handleNewGame}
+          onClose={() => setIsResultPopupOpened(false)}
+        />
+      )}
     </div>
   );
 };

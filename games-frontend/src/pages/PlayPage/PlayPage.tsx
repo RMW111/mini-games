@@ -1,4 +1,4 @@
-import { cursorColors, gamesComponents } from "src/pages/PlayPage/PlayPage.constants.tsx";
+import { participantsColors, gamesComponents } from "src/pages/PlayPage/PlayPage.constants.tsx";
 import { useParams } from "react-router-dom";
 import { type MouseEvent, type RefObject, Suspense, useEffect, useRef, useState } from "react";
 import { type ServerMsg, ServerMsgType } from "src/types/serverMsg.ts";
@@ -156,8 +156,12 @@ export const PlayPage = () => {
     );
   }
 
-  const cursors = Object.entries(userCursorsPositions).map(([userId, position], index) => {
-    return <Cursor key={userId} positionRef={position} color={cursorColors[index]} />;
+  console.log("userCursorsPositions:", userCursorsPositions);
+  const cursors = Object.entries(userCursorsPositions).map(([userId, positionRef]) => {
+    const participantIndex = session.participants.findIndex((x) => x.userId === userId);
+    const color =
+      participantIndex > -1 ? participantsColors[participantIndex] : participantsColors[0];
+    return <Cursor key={userId} positionRef={positionRef} color={color} />;
   });
 
   return (

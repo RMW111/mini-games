@@ -6,4 +6,12 @@ export const gamesComponents: Record<string, ElementType> = {
   minesweeper: Minesweeper,
 };
 
-export const cursorColors = ["#000000", "#A855F7", "#FB923C", "#3B82F6", "#10B981", "#EC4899"];
+export const participantsColors = [
+  "#ff0000",
+  "#A855F7",
+  "#10B981",
+  "#3B82F6",
+  "#000000",
+  "#FB923C",
+  "#EC4899",
+];

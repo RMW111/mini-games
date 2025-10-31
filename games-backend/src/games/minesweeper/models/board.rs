@@ -1,9 +1,11 @@
 use crate::games::minesweeper::constants::adjacent_positions::ADJACENT_POSITIONS;
 use crate::games::minesweeper::models::cell::Cell;
 use crate::games::minesweeper::models::cell_state::CellState;
+use crate::games::minesweeper::models::stats::StatInfo;
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 type Grid = Vec<Vec<Cell>>;
 
@@ -13,6 +15,7 @@ pub struct Board {
     pub grid: Grid,
     pub mines_count: usize,
     pub initialized: bool,
+    pub exploded: bool,
 }
 
 impl Board {
@@ -24,12 +27,16 @@ impl Board {
             mines_count,
             grid: vec![vec![Cell::default(); columns]; rows],
             initialized: false,
+            exploded: false,
         }
     }
 
-    pub fn on_cell_click(&mut self, row: usize, col: usize) {
+    pub fn on_cell_click(&mut self, row: usize, col: usize, stat: &mut StatInfo) {
+        if self.exploded {
+            return;
+        }
         if !self.initialized {
-            self.initialize(row, col);
+            self.initialize(row, col, stat);
         }
 
         if let Some(cell) = self.get_cell_mut(row, col) {
@@ -39,19 +46,25 @@ impl Board {
 
             cell.open_cell();
 
+            if !cell.has_mine {
+                stat.cells_opened += 1;
+            }
+
             if cell.has_mine {
                 self.reveal_closed_mines();
+                self.exploded = true;
+                stat.exploded = true;
             } else if cell.mines_around == 0 {
                 self.reveal_area(row, col);
             }
         }
     }
 
-    pub fn toggle_flagged(&mut self, row_index: usize, col_index: usize) {
-        self.grid[row_index][col_index].toggle_flagged();
+    pub fn toggle_flagged(&mut self, row_index: usize, col_index: usize, user_id: Uuid) {
+        self.grid[row_index][col_index].toggle_flagged(user_id);
     }
 
-    pub fn on_num_click(&mut self, row: usize, col: usize) -> Option<bool> {
+    pub fn on_num_click(&mut self, row: usize, col: usize, stat: &mut StatInfo) -> Option<bool> {
         if let Some(cell) = self.grid.get(row).and_then(|row| row.get(col)) {
             if cell.state != CellState::Opened || cell.mines_around < 1 {
                 return None;
@@ -86,30 +99,32 @@ impl Board {
             }
 
             for (row, col) in adjacent_closed_coords {
-                let cell_to_open = self.get_cell_mut(row, col).unwrap();
-                cell_to_open.open_cell();
-
-                if cell_to_open.mines_around == 0 && !cell_to_open.has_mine {
-                    self.reveal_area(row, col);
-                }
+                self.on_cell_click(row, col, stat);
             }
 
             if has_mine_in_closed_cells {
-                self.reveal_closed_mines();
                 return Some(true);
+            } else {
+                return Some(false);
             }
-
-            return Some(false);
         }
 
         None
     }
 
-    fn initialize(&mut self, row: usize, col: usize) {
+    pub fn check_game_completed(&mut self) -> bool {
+        self.grid
+            .iter()
+            .flatten()
+            .filter(|row| !row.has_mine)
+            .all(|row| row.state == CellState::Opened)
+    }
+
+    fn initialize(&mut self, row: usize, col: usize, stat: &mut StatInfo) {
         fill_with_mines(&mut self.grid, self.mines_count, (row, col));
         fill_with_numbers(&mut self.grid);
         self.initialized = true;
-        self.on_cell_click(row, col);
+        self.on_cell_click(row, col, stat);
     }
 
     fn reveal_closed_mines(&mut self) {

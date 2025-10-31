@@ -1,17 +1,31 @@
 import type { WSMsg } from "src/types/WSMsg.ts";
 
+export type BoardGrid = Cell[][];
+
+export interface Board {
+  grid: BoardGrid;
+  initialized: boolean;
+  exploded: boolean;
+  minesCount: number;
+}
+
+export interface StatInfo {
+  cellsOpened: number;
+  exploded: boolean;
+}
+
+export type Stats = Record<string, StatInfo>;
+
 export interface GameState {
-  board: {
-    grid: Cell[][];
-    initialized: boolean;
-    minesCount: number;
-  };
+  board: Board;
+  stats: Stats;
 }
 
 export interface Cell {
   state: CellState;
   hasMine: boolean;
   minesAround: number;
+  flaggedBy: string;
 }
 
 export interface CellPos {

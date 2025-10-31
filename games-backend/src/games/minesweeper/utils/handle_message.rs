@@ -3,31 +3,34 @@ use crate::features::sessions::models::session_connections::LiveSession;
 use crate::features::sessions::models::ws_messages::{ServerMessage, SessionMessage};
 use crate::features::sessions::utils::broadcast_to_session::broadcast_to_session;
 use crate::games::minesweeper::models::cell_state::CellState;
-use crate::games::minesweeper::models::messages::{ClickCellPayload, MinesweeperClientMessage};
+use crate::games::minesweeper::models::messages::{CellPosition, MinesweeperClientMessage};
 use crate::games::minesweeper::state::MinesweeperState;
 use crate::models::session::SessionStatus;
+use uuid::Uuid;
 
 pub async fn handle_minesweeper_message(
     message: MinesweeperClientMessage,
     live_session: &mut LiveSession,
     handler_data: HandlerData,
 ) {
+    let user_id = handler_data.user.id.clone();
+
     match message {
         MinesweeperClientMessage::CellClick(payload) => {
             process_minesweeper_action(live_session, handler_data, |live_session| {
-                cell_click_action(live_session, payload)
+                cell_click_action(live_session, payload, user_id)
             })
             .await
         }
         MinesweeperClientMessage::CellFlag(payload) => {
             process_minesweeper_action(live_session, handler_data, |live_session| {
-                cell_flag_action(live_session, payload)
+                cell_flag_action(live_session, payload, user_id)
             })
             .await
         }
         MinesweeperClientMessage::NumClick(payload) => {
             process_minesweeper_action(live_session, handler_data, |live_session| {
-                num_click_action(live_session, payload)
+                num_click_action(live_session, payload, user_id)
             })
             .await
         }
@@ -36,7 +39,8 @@ pub async fn handle_minesweeper_message(
 
 fn num_click_action(
     live_session: &mut LiveSession,
-    payload: ClickCellPayload,
+    payload: CellPosition,
+    user_id: Uuid,
 ) -> Vec<ServerMessage> {
     let mut messages_to_broadcast = vec![];
 
@@ -46,11 +50,18 @@ fn num_click_action(
             Err(_) => return messages_to_broadcast,
         };
 
-    if let Some(game_over) = game_state.board.on_num_click(payload.row, payload.col) {
+    let stat = game_state.stats.entry(user_id).or_default();
+    let click_result = game_state
+        .board
+        .on_num_click(payload.row, payload.col, stat);
+
+    let completed = game_state.board.check_game_completed();
+
+    if let Some(game_over) = click_result {
         let new_state_json = serde_json::to_value(game_state).unwrap();
         live_session.session_state.game_state = new_state_json.clone();
 
-        if game_over {
+        if game_over || completed {
             live_session.session_state.status = SessionStatus::Completed;
             let status_update_message = SessionMessage::StatusUpdate(SessionStatus::Completed);
             messages_to_broadcast.push(ServerMessage::Session(status_update_message));
@@ -65,41 +76,45 @@ fn num_click_action(
 
 fn cell_flag_action(
     live_session: &mut LiveSession,
-    payload: ClickCellPayload,
+    payload: CellPosition,
+    user_id: Uuid,
 ) -> Vec<ServerMessage> {
     let mut messages_to_broadcast = vec![];
     let mut game_state: MinesweeperState =
         match serde_json::from_value(live_session.session_state.game_state.clone()) {
             Ok(s) => s,
-            Err(_) => {
-                return messages_to_broadcast;
-            }
+            Err(_) => return messages_to_broadcast,
         };
 
     let cell = game_state.board.grid[payload.row][payload.col];
-    if cell.state != CellState::Opened {
-        game_state.board.toggle_flagged(payload.row, payload.col);
-        let new_state_json = serde_json::to_value(game_state).unwrap();
-        live_session.session_state.game_state = new_state_json.clone();
-        let message = SessionMessage::GameStateUpdate(new_state_json);
-        messages_to_broadcast.push(ServerMessage::Session(message));
+
+    if cell.state == CellState::Opened || cell.state == CellState::Exploded {
+        return messages_to_broadcast;
     }
+
+    game_state
+        .board
+        .toggle_flagged(payload.row, payload.col, user_id);
+
+    let new_state_json = serde_json::to_value(game_state).unwrap();
+    live_session.session_state.game_state = new_state_json.clone();
+    let message = SessionMessage::GameStateUpdate(new_state_json);
+    messages_to_broadcast.push(ServerMessage::Session(message));
 
     messages_to_broadcast
 }
 
 fn cell_click_action(
     live_session: &mut LiveSession,
-    payload: ClickCellPayload,
+    payload: CellPosition,
+    user_id: Uuid,
 ) -> Vec<ServerMessage> {
     let mut messages_to_broadcast = vec![];
 
     let mut game_state: MinesweeperState =
         match serde_json::from_value(live_session.session_state.game_state.clone()) {
             Ok(s) => s,
-            Err(_) => {
-                return messages_to_broadcast;
-            }
+            Err(_) => return messages_to_broadcast,
         };
 
     let cell = game_state.board.grid[payload.row][payload.col];
@@ -107,9 +122,14 @@ fn cell_click_action(
     if cell.state != CellState::Closed {
         return messages_to_broadcast;
     }
-    game_state.board.on_cell_click(payload.row, payload.col);
+    let stat = game_state.stats.entry(user_id).or_default();
+    game_state
+        .board
+        .on_cell_click(payload.row, payload.col, stat);
 
-    if cell.has_mine {
+    let completed = game_state.board.check_game_completed();
+
+    if cell.has_mine || completed {
         live_session.session_state.status = SessionStatus::Completed;
         let status_update_message = SessionMessage::StatusUpdate(SessionStatus::Completed);
         messages_to_broadcast.push(ServerMessage::Session(status_update_message));

@@ -2,7 +2,7 @@ use serde::Deserialize;
 
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
-pub struct ClickCellPayload {
+pub struct CellPosition {
     pub row: usize,
     pub col: usize,
 }
@@ -10,7 +10,7 @@ pub struct ClickCellPayload {
 #[derive(Deserialize, Debug)]
 #[serde(tag = "type", content = "payload", rename_all = "camelCase")]
 pub enum MinesweeperClientMessage {
-    CellClick(ClickCellPayload),
-    NumClick(ClickCellPayload),
-    CellFlag(ClickCellPayload),
+    CellClick(CellPosition),
+    NumClick(CellPosition),
+    CellFlag(CellPosition),
 }
