@@ -20,12 +20,8 @@ RUN npm run build
 # === ЭТАП 2: Сборка Rust бэкенда ===
 #############################################
 FROM rust:alpine3.22 AS backend-builder
-RUN apk add --no-cache \
-    musl-dev \
-    build-base \
-    pkgconfig \
-    openssl-dev \
-    ca-certificates
+RUN apk add --no-cache musl-dev pkgconfig openssl-dev
+RUN apk --no-cache add build-base ca-certificates
 
 WORKDIR /app
 
