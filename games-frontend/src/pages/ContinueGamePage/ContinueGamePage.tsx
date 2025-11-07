@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { type ElementType, useEffect, useMemo, useState } from "react";
 import { API } from "src/api";
 import { useParams } from "react-router-dom";
 import styles from "./ContinueGamePage.module.scss";
@@ -9,8 +9,37 @@ import { Container } from "src/components/layout/Container/Container.tsx";
 import { SessionCard } from "src/pages/ContinueGamePage/SessionCard/SessionCard.tsx";
 import { useAtom } from "jotai/index";
 import { userAtom } from "src/store/user.ts";
+import { GameSlug } from "src/types/game.ts";
+import { CellState, type GameState } from "src/games/Minesweeper/Minesweeper.types.ts";
 
 const SESSIONS_PER_PAGE = 10;
+
+export const MinesweeperSessionInfo = ({ gameState }: { gameState: GameState }) => {
+  const [openedCells, flaggedCells] = useMemo(() => {
+    const openedCells = gameState.board.grid
+      .flat()
+      .filter((col) => col.state === CellState.Opened).length;
+
+    const flaggedCells = gameState.board.grid
+      .flat()
+      .filter((col) => col.state === CellState.Flagged).length;
+
+    return [openedCells, flaggedCells];
+  }, [gameState]);
+
+  return (
+    <div>
+      Открыто креток: {openedCells} из{" "}
+      {gameState.board.grid.length * gameState.board.grid[0].length - gameState.board.minesCount}
+      <br />
+      Разминировано мин: {flaggedCells} из {gameState.board.minesCount}
+    </div>
+  );
+};
+
+const sessionCardInfo: Record<string, ElementType> = {
+  [GameSlug.Minesweeper]: MinesweeperSessionInfo,
+};
 
 export const ContinueGamePage = () => {
   const [user] = useAtom(userAtom);
@@ -60,15 +89,14 @@ export const ContinueGamePage = () => {
 
     return (
       <div className={styles.sessionList}>
-        {sessions.map((session) => (
-          <SessionCard key={session.id} session={session}>
-            {slug === "minesweeper" && (
-              <div>
-                <p>Состояние поля: ...</p>
-              </div>
-            )}
-          </SessionCard>
-        ))}
+        {sessions.map((session) => {
+          const CardInfo = sessionCardInfo[slug!];
+          return (
+            <SessionCard key={session.id} session={session}>
+              <CardInfo gameState={session.gameState} />
+            </SessionCard>
+          );
+        })}
       </div>
     );
   };

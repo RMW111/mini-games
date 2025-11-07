@@ -126,7 +126,9 @@ export const Minesweeper = ({ socket, session }: Props) => {
           <div className={styles.hudItem}></div>
         </div>
 
-        <div className={styles.board}>{rows}</div>
+        <div className={styles.board} onContextMenu={(e) => e.preventDefault()}>
+          {rows}
+        </div>
       </div>
 
       {session.status === SessionStatus.Completed && (

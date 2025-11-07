@@ -38,7 +38,6 @@ export enum CellState {
   Opened = "opened",
   Flagged = "flagged",
   Exploded = "exploded",
-  Pending = "pending",
 }
 
 export enum MinesweeperMsgType {

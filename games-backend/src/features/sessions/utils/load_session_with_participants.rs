@@ -1,7 +1,7 @@
-use sqlx::PgPool;
-use uuid::Uuid;
 use crate::features::sessions::dtos::participant::ParticipantDTO;
 use crate::models::session::Session;
+use sqlx::PgPool;
+use uuid::Uuid;
 
 pub async fn load_session_with_participants(
     pool: &PgPool,
@@ -9,12 +9,11 @@ pub async fn load_session_with_participants(
 ) -> Result<(Session, Vec<ParticipantDTO>), sqlx::Error> {
     let session = sqlx::query_as!(
         Session,
-        r#"SELECT id, game_id, status as "status: _", game_state FROM game_sessions WHERE id = $1"#,
+        r#"SELECT id, game_id, status as "status: _", game_state, created_at FROM game_sessions WHERE id = $1"#,
         session_id
     )
         .fetch_one(pool)
         .await?;
-
 
     let participants = sqlx::query_as!(
         ParticipantDTO,
@@ -26,8 +25,8 @@ pub async fn load_session_with_participants(
         "#,
         session_id
     )
-        .fetch_all(pool)
-        .await?;
+    .fetch_all(pool)
+    .await?;
 
     Ok((session, participants))
 }

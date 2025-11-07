@@ -102,6 +102,7 @@ async fn handle_socket(
             status: live_session.session_state.status.clone(),
             game_state: live_session.session_state.game_state.clone(),
             participants: live_session.participants.clone(),
+            created_at: live_session.session_state.created_at,
         };
         let welcome_message =
             ServerMessage::Session(SessionMessage::FullSessionState(initial_message));

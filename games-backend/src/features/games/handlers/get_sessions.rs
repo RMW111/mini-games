@@ -7,6 +7,7 @@ use axum::Json;
 use axum::extract::Path;
 use axum::response::IntoResponse;
 use axum_extra::extract::Query;
+use chrono::{DateTime, Utc};
 use serde::Deserialize;
 use serde_json::Value;
 use sqlx::FromRow;
@@ -38,6 +39,7 @@ struct SessionQueryResult {
     id: Uuid,
     status: SessionStatus,
     game_state: Value,
+    created_at: DateTime<Utc>,
     participants: sqlx::types::Json<Vec<ParticipantDTO>>,
 }
 
@@ -56,7 +58,7 @@ pub async fn get_sessions(
     let sessions_result = sqlx::query_as!(
         SessionQueryResult,
         r#"
-        SELECT gs.id, gs.status as "status: _", gs.game_state,
+        SELECT gs.id, gs.status as "status: _", gs.game_state, gs.created_at,
         COALESCE(
             json_agg(
                 json_build_object(
@@ -76,8 +78,8 @@ pub async fn get_sessions(
             g.slug = $1
             AND NOT (gs.status = ANY($2))
             AND (
-                $3::uuid IS NULL -- Эта часть истинна, если userId не передан
-                OR EXISTS (     -- Эта часть проверяется, только если userId передан
+                $3::uuid IS NULL
+                OR EXISTS (
                     SELECT 1
                     FROM session_participants sp_check
                     WHERE sp_check.session_id = gs.id AND sp_check.user_id = $3
@@ -104,6 +106,7 @@ pub async fn get_sessions(
             status: s.status,
             game_state: s.game_state,
             participants: s.participants.0,
+            created_at: s.created_at,
         })
         .collect();
 
