@@ -5,7 +5,7 @@ use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize, Type, PartialEq, Eq, Clone, Copy)]
 #[sqlx(type_name = "session_status", rename_all = "snake_case")]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 pub enum SessionStatus {
     Pending,
     InProgress,

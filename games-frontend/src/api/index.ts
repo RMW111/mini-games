@@ -5,6 +5,7 @@ import type { AuthReq, LoginReq } from "src/api/dtos/auth.ts";
 import type { GameInfo } from "src/types/game.ts";
 import type { CreateSessionReq, CreateSessionRes } from "src/api/dtos/session.ts";
 import type { User } from "src/types/user.ts";
+import type { Session } from "src/types/session.ts";
 
 export const API = {
   auth: {
@@ -15,6 +16,7 @@ export const API = {
   games: {
     getAll: GET<GameInfo[]>("games"),
     getBySlug: (slug: string) => GET<GameInfo>(`games/${slug}`),
+    getGameSessions: (slug: string) => GET<Session[]>(`games/${slug}/sessions`),
   },
   sessions: {
     createNew: POST<CreateSessionReq, CreateSessionRes>(`sessions/new`),

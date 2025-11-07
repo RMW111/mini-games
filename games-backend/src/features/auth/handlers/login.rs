@@ -1,3 +1,4 @@
+use crate::app_state::DatabaseConnection;
 use crate::features::auth::constants::{ACCESS_TOKEN_COOKIE, REFRESH_TOKEN_COOKIE};
 use crate::features::auth::dtos::login::LoginDTO;
 use crate::features::auth::utils::generate_auth_tokens::generate_auth_tokens;
@@ -11,7 +12,6 @@ use axum::response::IntoResponse;
 use axum_extra::extract::CookieJar;
 use axum_extra::extract::cookie::{Cookie, SameSite};
 use time::Duration;
-use crate::app_state::DatabaseConnection;
 
 pub async fn login(
     DatabaseConnection(pool): DatabaseConnection,
@@ -61,10 +61,16 @@ pub fn generate_auth_cookies(jar: CookieJar, access_token: &str, refresh_token: 
     let access_minutes = get_env_var("ACCESS_TOKEN_EXP_MIN").parse().unwrap();
     let refresh_minutes = get_env_var("REFRESH_TOKEN_EXP_MIN").parse().unwrap();
 
+    #[cfg(debug_assertions)]
+    let secure = false;
+
+    #[cfg(not(debug_assertions))]
+    let secure = true;
+
     jar.add(
         Cookie::build((ACCESS_TOKEN_COOKIE, access_token.to_string()))
             .http_only(true)
-            .secure(true)
+            .secure(secure)
             .same_site(SameSite::Lax)
             .path("/")
             .max_age(Duration::minutes(access_minutes))
@@ -73,7 +79,7 @@ pub fn generate_auth_cookies(jar: CookieJar, access_token: &str, refresh_token: 
     .add(
         Cookie::build((REFRESH_TOKEN_COOKIE, refresh_token.to_string()))
             .http_only(true)
-            .secure(true)
+            .secure(secure)
             .same_site(SameSite::Lax)
             .path("/")
             .max_age(Duration::minutes(refresh_minutes))

@@ -11,4 +11,5 @@ export interface Session<T = Record<string, string>> {
   id: string;
   participants: Participant[];
   status: SessionStatus;
+  createdAt: string;
 }

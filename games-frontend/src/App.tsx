@@ -12,6 +12,7 @@ import { useAtom } from "jotai";
 import { userAtom } from "src/store/user.ts";
 import { authAtom } from "src/store/auth.ts";
 import { ProtectedRoute } from "src/components/layout/ProtectedRoute/ProtectedRoute.tsx";
+import { ContinueGamePage } from "src/pages/ContinueGamePage/ContinueGamePage.tsx";
 
 function App() {
   const [, setUser] = useAtom(userAtom);
@@ -49,6 +50,15 @@ function App() {
           element={
             <ProtectedRoute>
               <GameLobbyPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/games/:slug/continue"
+          element={
+            <ProtectedRoute>
+              <ContinueGamePage />
             </ProtectedRoute>
           }
         />

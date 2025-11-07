@@ -70,7 +70,12 @@ export const GameLobbyPage = () => {
             Начать новую игру
           </button>
 
-          <button className={`${styles.actionButton} ${styles.secondary}`}>Продолжить игру</button>
+          <button
+            className={`${styles.actionButton} ${styles.secondary}`}
+            onClick={() => navigate(`/games/${slug}/continue`)}
+          >
+            Продолжить игру
+          </button>
 
           <button className={`${styles.actionButton} ${styles.secondary}`} onClick={openJoinModal}>
             Присоединиться к игре
