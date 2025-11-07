@@ -23,10 +23,7 @@ const RegistrationPage = () => {
     }
 
     try {
-      const image = await fetch("https://picsum.photos/300/300").then((response) => response);
-      console.log("image:", image.url);
-
-      await API.auth.register({ email, password, avatarUrl: image.url });
+      await API.auth.register({ email, password });
       setSuccess("Вы успешно зарегистрированы!");
       setEmail("");
       setPassword("");
