@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT id, game_id, status as \"status: _\", game_state FROM game_sessions WHERE id = $1",
+  "query": "SELECT id, game_id, status as \"status: _\", game_state, created_at FROM game_sessions WHERE id = $1",
   "describe": {
     "columns": [
       {
@@ -33,6 +33,11 @@
         "ordinal": 3,
         "name": "game_state",
         "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 4,
+        "name": "created_at",
+        "type_info": "Timestamptz"
       }
     ],
     "parameters": {
@@ -44,8 +49,9 @@
       false,
       false,
       false,
+      false,
       false
     ]
   },
-  "hash": "e32d2809947778a60c9e6aa9f21772ae65cfd60951b58d5a8750bae940c07331"
+  "hash": "587a7cf62544f5c0d970da4f7ab1b1bae5f2aec9b85364f587298c8480171138"
 }
