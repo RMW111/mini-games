@@ -18,8 +18,5 @@ pub fn generate_initial_game_state(
             let state = create_initial_go_state(creation_data)?;
             Ok(serde_json::to_value(state).unwrap())
         }
-        _ => Err(AppError::Internal(format!(
-            "No initial state generator found for game '{slug}'"
-        ))),
     }
 }

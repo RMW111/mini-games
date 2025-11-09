@@ -26,7 +26,6 @@ pub async fn create_session(
 
     let mut tx = pool.begin().await?;
 
-    println!("payload.creation_data: {:?}", payload.creation_data);
     let initial_state = generate_initial_game_state(&payload.slug, payload.creation_data)?;
     let initial_status = get_initial_session_status(payload.slug);
 
