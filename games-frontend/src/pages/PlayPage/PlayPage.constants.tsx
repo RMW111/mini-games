@@ -1,9 +1,12 @@
 import { type ElementType, lazy } from "react";
+import { GameSlug } from "src/types/game.ts";
 
 const Minesweeper = lazy(() => import("../../games/Minesweeper/Minesweeper.tsx"));
+const Go = lazy(() => import("../../games/Go/Go.tsx"));
 
-export const gamesComponents: Record<string, ElementType> = {
-  minesweeper: Minesweeper,
+export const gamesComponents: Record<GameSlug, ElementType> = {
+  [GameSlug.Minesweeper]: Minesweeper,
+  [GameSlug.Go]: Go,
 };
 
 export const participantsColors = [

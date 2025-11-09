@@ -24,6 +24,7 @@ export const PlayPage = () => {
     sessionId: string;
   }>();
   const gameAreaRef = useRef<HTMLDivElement>(null);
+  console.log("slug:::", slug);
   const GameComponent = gamesComponents[slug] || null;
   const socket = useRef<WebSocket | null>(null);
   const reconnectTimeoutId = useRef<number | null>(null); // Для хранения ID таймаута

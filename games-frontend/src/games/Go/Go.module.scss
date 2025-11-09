@@ -1,0 +1,95 @@
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-bottom: 40px;
+  background-color: #1a1a1a;
+  min-height: calc(100vh - 64px);
+  font-family: 'Inter', sans-serif;
+}
+
+.gameWrapper {
+  background-color: #e8b86d;
+  padding: 72px;
+}
+
+.boardContainer {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.line {
+  position: absolute;
+  width: calc(100% - 1px);
+  height: 1px;
+  background-color: #242424;
+
+  &_vertical {
+    transform: rotate(90deg);
+    width: 100%;
+    top: calc(50% - 0.5px);
+  }
+}
+
+.board {
+  background-color: #e8b86d;
+  position: relative;
+}
+
+.stone {
+  position: absolute;
+  z-index: 2;
+}
+
+.hiddenStone {
+  opacity: 0;
+
+  &:hover {
+    opacity: 0.6;
+  }
+}
+
+.number, .letter {
+  position: absolute;
+  font-family: Verdana, Arial, sans-serif;
+  text-anchor: middle;
+  font-weight: bold;
+  user-select: none;
+  font-size: 20px;
+  color: rgb(68, 68, 68);
+}
+
+.number {
+  width: 29px;
+  line-height: 20px;
+
+  &_left {
+    text-align: right;
+    left: -54px;
+  }
+
+  &_right {
+    right: -54px;
+  }
+}
+
+.letter {
+  &_top {
+    text-align: right;
+    top: -48px;
+  }
+
+  &_bottom {
+    bottom: -48px;
+  }
+}
+
+.hoshi {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background-color: black;
+  border-radius: 100px;
+  z-index: 1;
+}

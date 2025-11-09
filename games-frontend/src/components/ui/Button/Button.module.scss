@@ -2,7 +2,7 @@
   align-self: center;
   padding: 12px 24px;
   background-color: #646cff;
-  border: none;
+  border: 1px solid transparent;
   border-radius: 6px;
   color: #fff;
   font-size: 16px;
@@ -17,6 +17,16 @@
 
   &:hover {
     background-color: #535bf2;
+  }
+
+  &.secondary {
+    background-color: #333;
+    border-color: #444;
+
+    &:hover {
+      background-color: #444;
+      border-color: #646cff;
+    }
   }
 }
 

@@ -104,6 +104,10 @@ async fn handle_socket(
             participants: live_session.participants.clone(),
             created_at: live_session.session_state.created_at,
         };
+        println!(
+            "live_session.session_state.game_state: {:?}",
+            live_session.session_state.game_state
+        );
         let welcome_message =
             ServerMessage::Session(SessionMessage::FullSessionState(initial_message));
         let initial_message_json = serde_json::to_string(&welcome_message).unwrap();

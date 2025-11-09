@@ -11,6 +11,7 @@ pub enum AppError {
     Conflict(String),
     Internal(String),
     Forbidden(String),
+    BadRequest(String),
 }
 
 impl IntoResponse for AppError {
@@ -19,18 +20,22 @@ impl IntoResponse for AppError {
             Self::DatabaseError(db_error) => {
                 eprintln!("Database error: {:?}", db_error);
                 get_error_response(StatusCode::INTERNAL_SERVER_ERROR, "Database error")
-            },
+            }
             Self::Internal(message) => {
                 eprintln!("Internal Server Error: {}", message);
-                get_error_response(StatusCode::INTERNAL_SERVER_ERROR, "An internal error occurred")
-            },
+                get_error_response(
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "An internal error occurred",
+                )
+            }
             Self::Forbidden(message) => {
                 eprintln!("Access forbidden: {}", message);
                 get_error_response(StatusCode::FORBIDDEN, &message)
-            },
+            }
             Self::NotFound(message) => get_error_response(StatusCode::NOT_FOUND, &message),
             Self::Conflict(message) => get_error_response(StatusCode::CONFLICT, &message),
-            Self::Unauthorized(message) => get_error_response(StatusCode::UNAUTHORIZED, &message)
+            Self::Unauthorized(message) => get_error_response(StatusCode::UNAUTHORIZED, &message),
+            Self::BadRequest(message) => get_error_response(StatusCode::BAD_REQUEST, &message),
         }
         .into_response()
     }
@@ -46,7 +51,7 @@ impl From<Error> for AppError {
 
         match error {
             Error::RowNotFound => Self::NotFound("Resource not found".to_string()),
-            _ => Self::DatabaseError(error)
+            _ => Self::DatabaseError(error),
         }
     }
 }

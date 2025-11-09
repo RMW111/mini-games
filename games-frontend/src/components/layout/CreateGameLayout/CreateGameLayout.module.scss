@@ -1,0 +1,30 @@
+.createGameLayout {
+  background-color: #242424;
+  padding: 40px;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  width: 100%;
+  max-width: 700px;
+  margin: 40px auto;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 32px;
+  border-bottom: 1px solid #444;
+  padding-bottom: 24px;
+}
+
+.title {
+  font-size: 32px;
+  font-weight: bold;
+  margin: 0 0 12px 0;
+  color: #fff;
+}
+
+.description {
+  font-size: 18px;
+  color: #c0c0c0;
+  line-height: 1.6;
+  margin: 0;
+}

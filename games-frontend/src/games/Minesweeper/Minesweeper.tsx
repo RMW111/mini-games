@@ -1,11 +1,11 @@
 import styles from "./Minesweeper.module.scss";
-import { type Session, SessionStatus } from "src/types/session.ts";
+import { SessionStatus } from "src/types/session.ts";
 import {
   CellState,
   type GameState,
   MinesweeperMsgType,
 } from "src/games/Minesweeper/Minesweeper.types.ts";
-import { type RefObject, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Cell } from "src/games/Minesweeper/components/Cell/Cell.tsx";
 import { useSessionWS } from "src/hooks/useSessionWS.ts";
 import { GameSlug } from "src/types/game.ts";
@@ -17,13 +17,9 @@ import { userAtom } from "src/store/user.ts";
 import { ResultPopup } from "src/games/Minesweeper/components/ResultPopup/ResultPopup.tsx";
 import { Button } from "src/components/ui/Button/Button.tsx";
 import { participantsColors } from "src/pages/PlayPage/PlayPage.constants.tsx";
+import type { GameProps } from "src/types/gameProps.ts";
 
-interface Props {
-  socket: RefObject<WebSocket>;
-  session: Session<GameState>;
-}
-
-export const Minesweeper = ({ socket, session }: Props) => {
+export const Minesweeper = ({ socket, session }: GameProps<GameState>) => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const [user] = useAtom(userAtom);

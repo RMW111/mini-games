@@ -1,6 +1,7 @@
 pub mod app_error;
 pub mod cursor;
 pub mod error_response;
+pub mod game_slug;
 pub mod http;
 pub mod participant;
 pub mod position;

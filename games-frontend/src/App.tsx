@@ -13,6 +13,8 @@ import { userAtom } from "src/store/user.ts";
 import { authAtom } from "src/store/auth.ts";
 import { ProtectedRoute } from "src/components/layout/ProtectedRoute/ProtectedRoute.tsx";
 import { ContinueGamePage } from "src/pages/ContinueGamePage/ContinueGamePage.tsx";
+import { GameSlug } from "src/types/game.ts";
+import { CreateGoGamePage } from "src/pages/CreateGoGamePage/CreateGoGamePage.tsx";
 
 function App() {
   const [, setUser] = useAtom(userAtom);
@@ -62,6 +64,10 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        <Route path="/create-game">
+          <Route path={`/create-game/${GameSlug.Go}`} element={<CreateGoGamePage />} />
+        </Route>
 
         <Route
           path="/play/:slug/:sessionId"

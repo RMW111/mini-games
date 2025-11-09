@@ -2,11 +2,12 @@ import { type FormEvent, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { API } from "src/api";
 import styles from "./GameLobbyPage.module.scss";
-import type { GameInfo } from "src/types/game.ts";
+import { type GameInfo, GameSlug } from "src/types/game.ts";
 import { Popup } from "src/components/ui/Popup/Popup.tsx";
+import { needAdditionalPrepGames } from "src/pages/GameLobbyPage/GameLobbyPage.constants.ts";
 
 export const GameLobbyPage = () => {
-  const { slug } = useParams<{ slug: string }>();
+  const { slug } = useParams<{ slug: GameSlug }>();
   const navigate = useNavigate();
 
   const [game, setGame] = useState<GameInfo | null>(null);
@@ -32,9 +33,13 @@ export const GameLobbyPage = () => {
   }
 
   const handleNewGame = () => {
-    API.sessions.createNew({ slug: slug! }).then(({ sessionId }) => {
-      navigate(`/play/${game.slug}/${sessionId}`);
-    });
+    if (needAdditionalPrepGames.has(slug!)) {
+      navigate(`/create-game/${slug}`);
+    } else {
+      API.sessions.createNew({ slug: slug! }).then(({ sessionId }) => {
+        navigate(`/play/${slug}/${sessionId}`);
+      });
+    }
   };
 
   const handleJoinSession = (event: FormEvent) => {

@@ -1,38 +1,44 @@
 use crate::app_state::DatabaseConnection;
 use crate::features::sessions::dtos::create_session::CreateSessionDTO;
 use crate::features::sessions::dtos::created_session::CreatedSessionDTO;
+use crate::features::sessions::utils::generate_initial_game_state::generate_initial_game_state;
+use crate::features::sessions::utils::get_initial_session_status::get_initial_session_status;
 use crate::models::app_error::AppError;
+use crate::models::session::SessionStatus;
 use crate::models::user::User;
-use axum::{Json};
+use crate::models::validated_json::ValidatedJson;
+use axum::Json;
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
-use crate::features::sessions::utils::generate_initial_game_state::generate_initial_game_state;
-use crate::models::validated_json::ValidatedJson;
 
 pub async fn create_session(
     DatabaseConnection(pool): DatabaseConnection,
     user: User,
     ValidatedJson(payload): ValidatedJson<CreateSessionDTO>,
 ) -> Result<impl IntoResponse, AppError> {
-    let game_id = sqlx::query_scalar!("SELECT id FROM games WHERE slug = $1", payload.slug)
-        .fetch_optional(&pool)
-        .await?
-        .ok_or_else(|| {
-            AppError::NotFound(format!("Game with slug '{}' not found", payload.slug))
-        })?;
+    let game_id = sqlx::query_scalar!(
+        "SELECT id FROM games WHERE slug = $1",
+        payload.slug.to_string()
+    )
+    .fetch_optional(&pool)
+    .await?
+    .ok_or_else(|| AppError::NotFound(format!("Game with slug '{}' not found", payload.slug)))?;
 
     let mut tx = pool.begin().await?;
 
-    let initial_state = generate_initial_game_state(&payload.slug)?;
+    println!("payload.creation_data: {:?}", payload.creation_data);
+    let initial_state = generate_initial_game_state(&payload.slug, payload.creation_data)?;
+    let initial_status = get_initial_session_status(payload.slug);
 
     let session_id = sqlx::query_scalar!(
         r#"
         INSERT INTO game_sessions (game_id, game_state, status)
-        VALUES ($1, $2, 'in_progress')
+        VALUES ($1, $2, $3)
         RETURNING id
         "#,
         game_id,
-        initial_state
+        initial_state,
+        initial_status as SessionStatus
     )
     .fetch_one(&mut *tx)
     .await?;
