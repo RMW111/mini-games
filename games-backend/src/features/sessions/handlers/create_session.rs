@@ -40,7 +40,8 @@ pub async fn create_session(
         initial_status as SessionStatus
     )
     .fetch_one(&mut *tx)
-    .await?;
+    .await
+    .expect("Failed to get session ID after insert");
 
     sqlx::query!(
         r#"
