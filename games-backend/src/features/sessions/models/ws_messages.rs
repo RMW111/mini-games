@@ -1,5 +1,6 @@
 use crate::features::sessions::dtos::participant::ParticipantDTO;
 use crate::features::sessions::dtos::session::SessionDTO;
+use crate::games::go::models::messages::GoServerMessage;
 use crate::models::cursor::MovePayload;
 use crate::models::session::SessionStatus;
 use serde::Serialize;
@@ -14,12 +15,11 @@ pub enum SessionMessage {
     // Error { message: String },
 }
 
-// #[derive(Serialize, Debug, Clone)]
-// #[serde(tag = "game", content = "payload", rename_all = "camelCase")]
-// pub enum GameMessage {
-//     Minesweeper(MinesweeperMessage),
-//     // Chess(ChessMessage),
-// }
+#[derive(Serialize, Debug, Clone)]
+#[serde(tag = "game", content = "payload", rename_all = "camelCase")]
+pub enum GameMessage {
+    Go(GoServerMessage),
+}
 
 #[derive(Serialize, Debug, Clone)]
 #[serde(tag = "type", content = "payload", rename_all = "camelCase")]
@@ -32,5 +32,5 @@ pub enum CursorMessage {
 pub enum ServerMessage {
     Session(SessionMessage),
     Cursor(CursorMessage),
-    // Game(GameMessage),
+    Game(GameMessage),
 }

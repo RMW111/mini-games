@@ -5,5 +5,5 @@ import {
   MinesweeperMsgType,
 } from "src/games/Minesweeper/Minesweeper.types.ts";
 
-export const createMinesweeperWsMsg = (type: MinesweeperMsgType, payload: MinesweeperMsgPayload) =>
+export const createMinesweeperMsg = (type: MinesweeperMsgType, payload: MinesweeperMsgPayload) =>
   createWsMsg(type, payload) as MinesweeperMsg;

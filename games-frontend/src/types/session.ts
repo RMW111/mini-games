@@ -6,7 +6,7 @@ export enum SessionStatus {
   Completed = "completed",
 }
 
-export interface Session<T = Record<string, string>> {
+export interface Session<T = Record<string, unknown>> {
   gameState: T;
   id: string;
   participants: Participant[];

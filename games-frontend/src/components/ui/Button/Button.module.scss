@@ -28,6 +28,19 @@
       border-color: #646cff;
     }
   }
+
+  &.disabled {
+    background-color: #3a3a3a;
+    border-color: #3a3a3a;
+    color: #888;
+    cursor: default;
+
+    // Отключаем любые эффекты при наведении
+    &:hover {
+      background-color: #3a3a3a;
+      border-color: #3a3a3a;
+    }
+  }
 }
 
 .loading {

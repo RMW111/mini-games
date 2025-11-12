@@ -1,4 +1,4 @@
-import { type ElementType, useEffect, useMemo, useState } from "react";
+import { type ElementType, useEffect, useState } from "react";
 import { API } from "src/api";
 import { useParams } from "react-router-dom";
 import styles from "./ContinueGamePage.module.scss";
@@ -10,35 +10,14 @@ import { SessionCard } from "src/pages/ContinueGamePage/SessionCard/SessionCard.
 import { useAtom } from "jotai/index";
 import { userAtom } from "src/store/user.ts";
 import { GameSlug } from "src/types/game.ts";
-import { CellState, type GameState } from "src/games/Minesweeper/Minesweeper.types.ts";
+import { MinesweeperSessionInfo } from "src/pages/ContinueGamePage/MinesweeperSessionInfo/MinesweeperSessionInfo.tsx";
+import { GoSessionInfo } from "src/pages/ContinueGamePage/GoSessionInfo/GoSessionInfo.tsx";
 
 const SESSIONS_PER_PAGE = 10;
 
-export const MinesweeperSessionInfo = ({ gameState }: { gameState: GameState }) => {
-  const [openedCells, flaggedCells] = useMemo(() => {
-    const openedCells = gameState.board.grid
-      .flat()
-      .filter((col) => col.state === CellState.Opened).length;
-
-    const flaggedCells = gameState.board.grid
-      .flat()
-      .filter((col) => col.state === CellState.Flagged).length;
-
-    return [openedCells, flaggedCells];
-  }, [gameState]);
-
-  return (
-    <div>
-      Открыто креток: {openedCells} из{" "}
-      {gameState.board.grid.length * gameState.board.grid[0].length - gameState.board.minesCount}
-      <br />
-      Разминировано мин: {flaggedCells} из {gameState.board.minesCount}
-    </div>
-  );
-};
-
 const sessionCardInfo: Record<string, ElementType> = {
   [GameSlug.Minesweeper]: MinesweeperSessionInfo,
+  [GameSlug.Go]: GoSessionInfo,
 };
 
 export const ContinueGamePage = () => {

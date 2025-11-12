@@ -1,4 +1,5 @@
 import type { WSMsg } from "src/types/WSMsg.ts";
+import type { GridPos } from "src/types/gridPos.ts";
 
 export type BoardGrid = Cell[][];
 
@@ -28,11 +29,6 @@ export interface Cell {
   flaggedBy: string;
 }
 
-export interface CellPos {
-  row: number;
-  col: number;
-}
-
 export enum CellState {
   Closed = "closed",
   Opened = "opened",
@@ -47,7 +43,7 @@ export enum MinesweeperMsgType {
 }
 
 export type MinesweeperMsg =
-  | WSMsg<MinesweeperMsgType.CellClick, CellPos>
-  | WSMsg<MinesweeperMsgType.CellFlag, CellPos>;
+  | WSMsg<MinesweeperMsgType.CellClick, GridPos>
+  | WSMsg<MinesweeperMsgType.CellFlag, GridPos>;
 
-export type MinesweeperMsgPayload = CellPos;
+export type MinesweeperMsgPayload = GridPos;

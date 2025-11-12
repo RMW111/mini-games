@@ -11,7 +11,7 @@ import { useSessionWS } from "src/hooks/useSessionWS.ts";
 import { GameSlug } from "src/types/game.ts";
 import { API } from "src/api";
 import { useNavigate, useParams } from "react-router-dom";
-import { createMinesweeperWsMsg } from "src/games/Minesweeper/Minesweeper.utils.ts";
+import { createMinesweeperMsg } from "src/games/Minesweeper/Minesweeper.utils.ts";
 import { useAtom } from "jotai/index";
 import { userAtom } from "src/store/user.ts";
 import { ResultPopup } from "src/games/Minesweeper/components/ResultPopup/ResultPopup.tsx";
@@ -37,10 +37,10 @@ export const Minesweeper = ({ socket, session }: GameProps<GameState>) => {
     const payload = { row: rowIndex, col: cellIndex };
 
     if (cell.state === CellState.Closed) {
-      const message = createMinesweeperWsMsg(MinesweeperMsgType.CellClick, payload);
+      const message = createMinesweeperMsg(MinesweeperMsgType.CellClick, payload);
       sendGameMsg(message);
     } else if (cell.state === CellState.Opened && cell.minesAround > 0) {
-      const message = createMinesweeperWsMsg(MinesweeperMsgType.NumClick, payload);
+      const message = createMinesweeperMsg(MinesweeperMsgType.NumClick, payload);
       sendGameMsg(message);
     }
   };
@@ -50,7 +50,7 @@ export const Minesweeper = ({ socket, session }: GameProps<GameState>) => {
 
     if (cell.flaggedBy && cell.flaggedBy !== user?.id) return;
 
-    const message = createMinesweeperWsMsg(MinesweeperMsgType.CellFlag, {
+    const message = createMinesweeperMsg(MinesweeperMsgType.CellFlag, {
       row: rowIndex,
       col: cellIndex,
     });

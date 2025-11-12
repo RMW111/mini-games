@@ -10,6 +10,7 @@ use crate::features::sessions::models::ws_client_messages::{
 use crate::features::sessions::models::ws_messages::{ServerMessage, SessionMessage};
 use crate::features::sessions::utils::handle_cursor_move_message::handle_cursor_move_message;
 use crate::features::sessions::utils::load_session_with_participants::load_session_with_participants;
+use crate::games::go::utils::handle_message::handle_go_message;
 use crate::games::minesweeper::utils::handle_message::handle_minesweeper_message;
 use crate::models::app_error::AppError;
 use crate::models::session::SessionStatus;
@@ -104,10 +105,7 @@ async fn handle_socket(
             participants: live_session.participants.clone(),
             created_at: live_session.session_state.created_at,
         };
-        println!(
-            "live_session.session_state.game_state: {:?}",
-            live_session.session_state.game_state
-        );
+
         let welcome_message =
             ServerMessage::Session(SessionMessage::FullSessionState(initial_message));
         let initial_message_json = serde_json::to_string(&welcome_message).unwrap();
@@ -243,6 +241,9 @@ async fn handle_game_message(
     match message {
         GameClientMessage::Minesweeper(message) => {
             handle_minesweeper_message(message, live_session, handler_data).await
+        }
+        GameClientMessage::Go(message) => {
+            handle_go_message(message, live_session, handler_data).await
         }
     };
 }

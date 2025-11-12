@@ -2,9 +2,7 @@ use crate::app_state::DatabaseConnection;
 use crate::features::sessions::dtos::create_session::CreateSessionDTO;
 use crate::features::sessions::dtos::created_session::CreatedSessionDTO;
 use crate::features::sessions::utils::generate_initial_game_state::generate_initial_game_state;
-use crate::features::sessions::utils::get_initial_session_status::get_initial_session_status;
 use crate::models::app_error::AppError;
-use crate::models::session::SessionStatus;
 use crate::models::user::User;
 use crate::models::validated_json::ValidatedJson;
 use axum::Json;
@@ -27,17 +25,15 @@ pub async fn create_session(
     let mut tx = pool.begin().await?;
 
     let initial_state = generate_initial_game_state(&payload.slug, payload.creation_data)?;
-    let initial_status = get_initial_session_status(payload.slug);
 
     let session_id = sqlx::query_scalar!(
         r#"
         INSERT INTO game_sessions (game_id, game_state, status)
-        VALUES ($1, $2, $3)
+        VALUES ($1, $2, 'in_progress')
         RETURNING id
         "#,
         game_id,
         initial_state,
-        initial_status as SessionStatus
     )
     .fetch_one(&mut *tx)
     .await

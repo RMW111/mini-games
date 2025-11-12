@@ -1,4 +1,4 @@
-export interface WSMsg<Type, Payload> {
+export interface WSMsg<Type, Payload = undefined> {
   type: Type;
   payload: Payload;
 }

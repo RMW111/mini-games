@@ -9,17 +9,13 @@ pub fn create_initial_state(creation_data: Option<Value>) -> Result<GoState, App
             Ok(data) => data,
             Err(_) => return Err(AppError::BadRequest("creation_data is invalid".into())),
         };
+
         let board_size = data.board_size;
         if board_size != 9 && board_size != 13 && board_size != 19 {
             return Err(AppError::BadRequest("invalid board_size".into()));
         }
 
-        let board = vec![vec![0; data.board_size as usize]; data.board_size as usize];
-
-        return Ok(GoState {
-            creator_color: data.color,
-            board,
-        });
+        return Ok(GoState::new(data));
     }
 
     Err(AppError::BadRequest("There are no creation_data".into()))

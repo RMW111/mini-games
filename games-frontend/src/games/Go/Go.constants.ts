@@ -1,4 +1,4 @@
-import { BoardSize } from "src/games/Go/Go.models.ts";
+import { BoardSize } from "src/games/Go/Go.types.ts";
 
 export const LETTERS_LABELS = "ABCDEFGHJKLMNOPQRST";
 

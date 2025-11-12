@@ -5,7 +5,7 @@ import styles from "./CreateGoGamePage.module.scss";
 import { API } from "src/api";
 import { useNavigate } from "react-router-dom";
 import { GameSlug } from "src/types/game.ts";
-import { StoneColor } from "src/games/Go/Go.models.ts";
+import { StoneColor } from "src/games/Go/Go.types.ts";
 import cn from "classnames";
 import { BOARD_SIZES } from "src/games/Go/Go.constants.ts";
 

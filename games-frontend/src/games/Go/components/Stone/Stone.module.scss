@@ -2,10 +2,12 @@
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  cursor: pointer;
   transition: transform 0.1s ease;
   box-sizing: border-box;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   &.black {
     background: radial-gradient(circle at 35% 35%, #4a4a4a, #000);
@@ -13,6 +15,11 @@
             0 2px 4px rgba(0, 0, 0, 0.4),
             inset 1px 1px 2px rgba(255, 255, 255, 0.1);
     border: 1px solid #222;
+
+    .lastMoveMarker {
+      background-color: white;
+      box-shadow: 0 0 7px 2px rgba(255, 255, 255, 0.7);
+    }
   }
 
   &.white {
@@ -21,5 +28,39 @@
             0 2px 4px rgba(0, 0, 0, 0.3),
             inset -1px -1px 2px rgba(0, 0, 0, 0.1);
     border: 1px solid #ccc;
+
+    .lastMoveMarker {
+      background-color: black;
+      box-shadow: 0 0 7px 2px rgba(0, 0, 0, 0.4);
+    }
+  }
+
+  &.lastPlaced {
+    //animation: pulse 1.5s infinite;
+    //box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.7);
+    //border: 2px solid #007bff;
+  }
+}
+
+.lastMoveMarker {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  box-sizing: border-box;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.85;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
   }
 }

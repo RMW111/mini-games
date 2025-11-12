@@ -1,4 +1,4 @@
-import { participantsColors, gamesComponents } from "src/pages/PlayPage/PlayPage.constants.tsx";
+import { gamesComponents, participantsColors } from "src/pages/PlayPage/PlayPage.constants.tsx";
 import { useParams } from "react-router-dom";
 import { type MouseEvent, type RefObject, Suspense, useEffect, useRef, useState } from "react";
 import { type ServerMsg, ServerMsgType } from "src/types/serverMsg.ts";
@@ -15,6 +15,7 @@ import { createCursorWsMsg } from "src/pages/PlayPage/PlayPage.utils.ts";
 import { ClientCursorMsgType } from "src/types/clientCursorMsg.ts";
 import { type ServerCursorMsg, ServerCursorMsgType } from "src/types/serverCursorMsg.ts";
 import { Container } from "src/components/layout/Container/Container.tsx";
+import type { ServerGameMsgPayload } from "src/types/serverGameMsg.ts";
 
 const MAX_RECONNECT_TRYS = 5;
 
@@ -24,12 +25,12 @@ export const PlayPage = () => {
     sessionId: string;
   }>();
   const gameAreaRef = useRef<HTMLDivElement>(null);
-  console.log("slug:::", slug);
   const GameComponent = gamesComponents[slug] || null;
   const socket = useRef<WebSocket | null>(null);
   const reconnectTimeoutId = useRef<number | null>(null); // Для хранения ID таймаута
   const { sendCursorMsg } = useSessionWS(socket.current, slug);
   const [session, setSession] = useState<Session>();
+  const [serverGameMsg, setServerGameMsg] = useState<ServerGameMsgPayload>();
   const reconnectTrys = useRef(0);
   const [userCursorsPositions, setUserCursorsPositions] = useState<
     Record<string, RefObject<Position>>
@@ -104,13 +105,14 @@ export const PlayPage = () => {
         return handleSessionMsg(event.payload);
       case ServerMsgType.Cursor:
         return handleCursorMsg(event.payload);
+      case ServerMsgType.Game:
+        return setServerGameMsg(event.payload.payload);
     }
   };
 
   const handleCursorMsg = (event: ServerCursorMsg) => {
     switch (event.type) {
       case ServerCursorMsgType.Move:
-        console.log("update position:", event.payload);
         return setUserCursorsPositions((positions) => {
           const { userId } = event.payload;
           if (positions[userId]) {
@@ -147,6 +149,10 @@ export const PlayPage = () => {
     updateMousePositionThrottled({ x, y });
   };
 
+  const updateGameState = (gameState: Record<string, unknown>) => {
+    setSession({ ...session!, gameState });
+  };
+
   if (!session) {
     return <Loader text="Подключение к игровой сессии..." />;
   }
@@ -157,7 +163,6 @@ export const PlayPage = () => {
     );
   }
 
-  console.log("userCursorsPositions:", userCursorsPositions);
   const cursors = Object.entries(userCursorsPositions).map(([userId, positionRef]) => {
     const participantIndex = session.participants.findIndex((x) => x.userId === userId);
     const color =
@@ -171,7 +176,13 @@ export const PlayPage = () => {
 
       <main className={styles.gameArea} onMouseMove={onMouseMove} ref={gameAreaRef}>
         <Suspense fallback={<Loader text="Загрузка компонентов игры..." />}>
-          <GameComponent sessionId={sessionId} session={session} socket={socket} />
+          <GameComponent
+            sessionId={sessionId}
+            session={session}
+            updateGameState={updateGameState}
+            socket={socket}
+            serverMsg={serverGameMsg}
+          />
         </Suspense>
       </main>
     </Container>
