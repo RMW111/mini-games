@@ -9,6 +9,6 @@ export const createClientWsMsg = (type: ClientMsgType, payload: ClientMsgPayload
 export const createGameWsMsg = (type: GameSlug, payload: ClientGameMsgPayload) =>
   createWsMsg(type, payload) as ClientGameMsg;
 
-export const createWsMsg = <Type, Payload>(type: Type, payload?: Payload): WSMsg<Type, Payload> => {
+export const createWsMsg = <Type, Payload>(type: Type, payload: Payload): WSMsg<Type, Payload> => {
   return { type, payload };
 };
