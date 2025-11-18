@@ -1,6 +1,14 @@
 import styles from "./Go.module.scss";
 import cn from "classnames";
-import { BoardSize, type GameState, GoMsgType, GoServerMsgType } from "src/games/Go/Go.types.ts";
+import {
+  BoardSize,
+  type GameState,
+  GoMsgType,
+  GoServerMsgType,
+  Mode,
+  StoneColor,
+  WinningReason,
+} from "src/games/Go/Go.types.ts";
 import { HOSHI_POSITIONS, LETTERS_LABELS } from "src/games/Go/Go.constants.ts";
 import type { GameProps } from "src/types/gameProps.ts";
 import { Stone } from "src/games/Go/components/Stone/Stone.tsx";
@@ -8,17 +16,55 @@ import { useSessionWS } from "src/hooks/useSessionWS.ts";
 import { GameSlug } from "src/types/game.ts";
 import { createGoMsg, getOppositeColor } from "src/games/Go/Go.utils.ts";
 import { ParticipantRole } from "src/types/participant.ts";
-import { Fragment, useEffect, useMemo } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { useAtom } from "jotai/index";
 import { userAtom } from "src/store/user.ts";
+import { SidePanel } from "src/games/Go/components/SidePanel/SidePanel.tsx";
+import { WaitingForOpponent } from "src/games/Go/components/WaitingForOpponent/WaitingForOpponent.tsx";
+import { API } from "src/api";
+import { useNavigate } from "react-router-dom";
+import { SessionStatus } from "src/types/session.ts";
+import { GameOverPanel } from "src/games/Go/components/GameOverPanel/GameOverPanel.tsx";
+import { Popup } from "src/components/ui/Popup/Popup.tsx";
 import { Button } from "src/components/ui/Button/Button.tsx";
+import { WarningIcon } from "src/components/icons/WarningIcon.tsx";
 
 const lineGaps = 38;
 const lineWidth = 1;
 
 const Go = ({ socket, session, updateGameState, serverMsg }: GameProps<GameState>) => {
   const [user] = useAtom(userAtom);
+  const navigate = useNavigate();
   const { sendGameMsg } = useSessionWS(socket.current, GameSlug.Go);
+  const isScoringMode = session.gameState.mode == Mode.Scoring;
+  const [isLeaving, setIsLeaving] = useState(false);
+  const [isResignPopupOpen, setIsResignPopupOpen] = useState(false);
+  const boardSize = session.gameState.board[0].length as BoardSize;
+  const boardWidth = boardSize * lineWidth + (boardSize - 1) * lineGaps;
+
+  const territoryBoard = useMemo(() => {
+    const territoryBoard: StoneColor[][] = Array.from({ length: boardSize }).map(() => []);
+    session.gameState.score.blackTerritory.forEach(([rowI, colI]) => {
+      territoryBoard[rowI][colI] = StoneColor.Black;
+    });
+    session.gameState.score.whiteTerritory.forEach(([rowI, colI]) => {
+      territoryBoard[rowI][colI] = StoneColor.White;
+    });
+    return territoryBoard;
+  }, [session.gameState.score]);
+
+  const getDeadStonesBoard = () => {
+    const deadStonesBoard: StoneColor[][] = Array.from({ length: boardSize }).map(() => []);
+    session.gameState.score.blackDeadStones.forEach(([rowI, colI]) => {
+      deadStonesBoard[rowI][colI] = StoneColor.Black;
+    });
+    session.gameState.score.whiteDeadStones.forEach(([rowI, colI]) => {
+      deadStonesBoard[rowI][colI] = StoneColor.White;
+    });
+    return deadStonesBoard;
+  };
+
+  const deadStonesBoard = getDeadStonesBoard();
 
   useEffect(() => {
     if (!serverMsg) {
@@ -26,23 +72,25 @@ const Go = ({ socket, session, updateGameState, serverMsg }: GameProps<GameState
     }
 
     switch (serverMsg.type) {
-      case GoServerMsgType.Passed:
-        return handlePassedMsg();
+      case GoServerMsgType.ScoringCanceled:
+        return handleScoringCanceled();
+      case GoServerMsgType.Resigned:
+        return handleResigned(serverMsg.payload);
     }
   }, [serverMsg]);
 
-  const handlePassedMsg = () => {
-    session.gameState.lastMoveWasPass = true;
-    changeTurn();
+  const handleResigned = (color: StoneColor) => {
+    session.gameState.won = getOppositeColor(color);
+    session.gameState.winningReason = WinningReason.Resignation;
     updateGameState(session.gameState);
   };
 
-  const changeTurn = () => {
-    session.gameState.currentTurn = getOppositeColor(session.gameState.currentTurn);
+  const handleScoringCanceled = () => {
+    session.gameState.mode = Mode.Playing;
+    session.gameState.blackApprovedScore = false;
+    session.gameState.whiteApprovedScore = false;
+    updateGameState(session.gameState);
   };
-
-  const boardSize = session.gameState.board[0].length as BoardSize;
-  const boardWidth = boardSize * lineWidth + (boardSize - 1) * lineGaps;
 
   const amICreator = useMemo(() => {
     const creator = session.participants.find((p) => p.role === ParticipantRole.Creator);
@@ -61,9 +109,39 @@ const Go = ({ socket, session, updateGameState, serverMsg }: GameProps<GameState
     sendGameMsg(message);
   };
 
-  const handlePassTurn = () => {
+  const toggleStonesAsEaten = (row: number, col: number) => {
+    const message = createGoMsg(GoMsgType.ToggleEaten, [row, col]);
+    sendGameMsg(message);
+  };
+
+  const onLeaveSessionClick = () => {
+    setIsLeaving(true);
+
+    API.sessions
+      .delete(session.id)()
+      .then(() => navigate("/games"))
+      .finally(() => setIsLeaving(false));
+  };
+
+  const handlePass = () => {
     if (!isMyTurn) return;
     const message = createGoMsg(GoMsgType.Pass);
+    sendGameMsg(message);
+  };
+
+  const handleResign = () => {
+    const message = createGoMsg(GoMsgType.Resign);
+    sendGameMsg(message);
+    setIsResignPopupOpen(false);
+  };
+
+  const cancelScoringMode = () => {
+    const message = createGoMsg(GoMsgType.CancelScoring);
+    sendGameMsg(message);
+  };
+
+  const approveScore = () => {
+    const message = createGoMsg(GoMsgType.ApproveScore);
     sendGameMsg(message);
   };
 
@@ -88,20 +166,38 @@ const Go = ({ socket, session, updateGameState, serverMsg }: GameProps<GameState
         return null;
       }
 
+      if (!color && isScoringMode) {
+        return null;
+      }
+
+      if (!color && session.gameState.winningReason) {
+        return null;
+      }
+
       const isLastPlaced = Boolean(
         session.gameState.lastStonePlaced &&
           rowI === session.gameState.lastStonePlaced[0] &&
           colI === session.gameState.lastStonePlaced[1]
       );
 
+      const isDeadStone = Boolean(deadStonesBoard[rowI][colI]);
+
+      const classes = cn(
+        styles.stone,
+        { [styles.hiddenStone]: !color },
+        { [styles.deadStone]: isDeadStone }
+      );
+
       return (
         <Stone
           key={`${rowI}-${colI}`}
           style={{ top, left }}
-          className={cn(styles.stone, { [styles.hiddenStone]: !color })}
+          className={classes}
           color={color || session.gameState.currentTurn}
-          onClick={() => placeStone(rowI, colI)}
+          onClick={() => (isScoringMode ? toggleStonesAsEaten(rowI, colI) : placeStone(rowI, colI))}
           isLastPlaced={isLastPlaced}
+          isScoringMode={isScoringMode}
+          isGaveOver={session.status === SessionStatus.Completed}
         />
       );
     });
@@ -141,6 +237,27 @@ const Go = ({ socket, session, updateGameState, serverMsg }: GameProps<GameState
     return <div key={`${rowI}-${colI}`} style={{ top, left }} className={styles.hoshi} />;
   });
 
+  const territoryMarks =
+    isScoringMode &&
+    [...session.gameState.score.whiteTerritory, ...session.gameState.score.blackTerritory].map(
+      ([rowI, colI]) => {
+        const top = rowI * lineGaps + rowI * lineWidth - 6;
+        const left = colI * lineGaps + colI * lineWidth - 6;
+        const color = territoryBoard[rowI][colI];
+
+        if (!color) {
+          return null;
+        }
+
+        const classes = cn(styles.territoryMark, {
+          [styles.black]: color === StoneColor.Black,
+          [styles.white]: color === StoneColor.White,
+        });
+
+        return <div key={`${rowI}-${colI}`} style={{ top, left }} className={classes} />;
+      }
+    );
+
   return (
     <div className={styles.container}>
       <div className={styles.gameWrapper} onContextMenu={(e) => e.preventDefault()}>
@@ -151,45 +268,63 @@ const Go = ({ socket, session, updateGameState, serverMsg }: GameProps<GameState
             {numbers}
             {letters}
             {hoshi}
+            {territoryMarks}
           </div>
         </div>
       </div>
 
-      <div className={styles.uiPanel}>
-        <div className={styles.turnIndicator}>
-          {isMyTurn ? (
-            <span className={styles.myTurn}>Ваш ход</span>
+      {session.status !== SessionStatus.Completed && (
+        <>
+          {session.participants.length === 1 ? (
+            <WaitingForOpponent
+              inviteLink={`${window.location.origin}/play/${GameSlug.Go}/${session.id}`}
+              onLeave={onLeaveSessionClick}
+              isLeaving={isLeaving}
+            />
           ) : (
-            <span className={styles.opponentTurn}>Ход противника</span>
+            <SidePanel
+              session={session}
+              handlePass={handlePass}
+              handleResign={() => setIsResignPopupOpen(true)}
+              cancelScoringMode={cancelScoringMode}
+              isMyTurn={isMyTurn}
+              myStonesColor={myStonesColor}
+              approveScore={approveScore}
+            />
           )}
-        </div>
+        </>
+      )}
 
-        {session.gameState.lastMoveWasPass && isMyTurn && (
-          <div className={styles.passIndicator}>Противник спасовал</div>
-        )}
+      {session.status === SessionStatus.Completed && (
+        <GameOverPanel
+          session={session}
+          blackPlayer={{ name: "local@m.ru", avatarUrl: session.participants[0].avatarUrl }}
+          whitePlayer={{ name: "m@m.ru", avatarUrl: session.participants[1].avatarUrl }}
+        />
+      )}
 
-        <div className={styles.actions}>
-          <Button onClick={handlePassTurn} isDisabled={!isMyTurn}>
-            Пас
-          </Button>
-        </div>
+      <Popup
+        isOpen={isResignPopupOpen}
+        onClose={() => setIsResignPopupOpen(false)}
+        title="Вы уверены, что хотите сдаться?"
+      >
+        <div className={styles.resignContent}>
+          <WarningIcon className={styles.icon} />
+          <p className={styles.description}>
+            Это действие нельзя будет отменить. Игра немедленно завершится, и победа будет
+            присуждена вашему сопернику.
+          </p>
+          <div className={styles.buttons}>
+            <Button variant="secondary" onClick={() => setIsResignPopupOpen(false)}>
+              Отмена
+            </Button>
 
-        <div className={styles.scoreSection}>
-          <div className={styles.scoreLine}>
-            <span>Пленено Черных:</span>
-            <span>{session.gameState.score.blackCaptured}</span>
+            <Button variant="danger" onClick={handleResign}>
+              Подтвердить сдачу
+            </Button>
           </div>
-          <div className={styles.scoreLine}>
-            <span>Пленено Белых:</span>
-            <span>{session.gameState.score.whiteCaptured}</span>
-          </div>
-
-          <div className={cn(styles.scoreLine, styles.komiInfo)}>
-            <span>Коми:</span>
-            <span>+6.5</span>
-          </div>
         </div>
-      </div>
+      </Popup>
     </div>
   );
 };

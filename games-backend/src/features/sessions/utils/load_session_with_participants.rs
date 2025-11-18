@@ -18,7 +18,7 @@ pub async fn load_session_with_participants(
     let participants = sqlx::query_as!(
         ParticipantDTO,
         r#"
-        SELECT p.user_id, u.email, p.role as "role: _"
+        SELECT p.user_id, u.email, p.role as "role: _", u.avatar_url
         FROM session_participants p
         JOIN users u ON p.user_id = u.id
         WHERE p.session_id = $1 ORDER BY p.joined_at

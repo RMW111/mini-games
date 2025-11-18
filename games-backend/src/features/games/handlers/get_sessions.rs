@@ -1,14 +1,13 @@
 use crate::app_state::DatabaseConnection;
-use crate::features::sessions::dtos::participant::ParticipantDTO;
-use crate::features::sessions::dtos::session::SessionDTO;
 use crate::models::app_error::AppError;
+use crate::models::participant::ParticipantRole;
 use crate::models::session::SessionStatus;
 use axum::Json;
 use axum::extract::Path;
 use axum::response::IntoResponse;
 use axum_extra::extract::Query;
 use chrono::{DateTime, Utc};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sqlx::FromRow;
 use uuid::Uuid;
@@ -32,6 +31,24 @@ fn default_page() -> u32 {
 
 fn default_size() -> u32 {
     10
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct ParticipantDTO {
+    pub user_id: Uuid,
+    pub email: String,
+    pub role: ParticipantRole,
+}
+
+#[derive(Serialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct SessionDTO {
+    pub id: Uuid,
+    pub status: SessionStatus,
+    pub game_state: Value,
+    pub participants: Vec<ParticipantDTO>,
+    pub created_at: DateTime<Utc>,
 }
 
 #[derive(FromRow, Debug)]

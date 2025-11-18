@@ -35,10 +35,21 @@
     }
   }
 
-  &.lastPlaced {
-    //animation: pulse 1.5s infinite;
-    //box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.7);
-    //border: 2px solid #007bff;
+  &.scoringMode {
+    &:hover {
+      &::after {
+        content: '✕';
+        position: absolute;
+        top: 47%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 24px;
+        font-weight: bold;
+        color: #ff4d4d;
+        z-index: 2;
+        text-shadow: 0 0 5px rgba(0, 0, 0, 0.7);
+      }
+    }
   }
 }
 

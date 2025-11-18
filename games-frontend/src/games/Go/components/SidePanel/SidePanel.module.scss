@@ -1,0 +1,85 @@
+.sidePanel {
+  background-color: #242424;
+  padding: 24px;
+  border-radius: 12px;
+  border: 1px solid #444;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  color: #fff;
+}
+
+.playersContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.mainActions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.statusMessage {
+  background-color: rgba(100, 108, 255, 0.1);
+  color: #c4c8ff;
+  padding: 12px;
+  border-radius: 6px;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.scoringPhase {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 24px;
+  margin-top: -12px;
+  border-top: 1px solid #444;
+}
+
+.scoringDescription {
+  font-size: 14px;
+  color: #c0c0c0;
+  line-height: 1.6;
+  text-align: center;
+  margin: 0 0 8px 0;
+}
+
+.agreementStatus {
+  background-color: #2c2c2c;
+  padding: 16px;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.agreementItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 16px;
+}
+
+.iconCheck, .iconCross {
+  width: 24px;
+  height: 24px;
+}
+.iconCheck {
+  color: #4caf50;
+}
+.iconCross {
+  color: #f44336;
+}
+
+.resumeButtonContainer {
+  margin-top: 8px;
+  button {
+    width: 100%;
+  }
+}

@@ -8,4 +8,5 @@ export interface Participant {
   email: string;
   role: ParticipantRole;
   userId: string;
+  avatarUrl: string;
 }

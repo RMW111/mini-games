@@ -1,4 +1,8 @@
-import { gamesComponents, participantsColors } from "src/pages/PlayPage/PlayPage.constants.tsx";
+import {
+  gamesComponents,
+  participantsColors,
+  SocketErrorCode,
+} from "src/pages/PlayPage/PlayPage.constants.tsx";
 import { useParams } from "react-router-dom";
 import { type MouseEvent, type RefObject, Suspense, useEffect, useRef, useState } from "react";
 import { type ServerMsg, ServerMsgType } from "src/types/serverMsg.ts";
@@ -27,10 +31,11 @@ export const PlayPage = () => {
   const gameAreaRef = useRef<HTMLDivElement>(null);
   const GameComponent = gamesComponents[slug] || null;
   const socket = useRef<WebSocket | null>(null);
-  const reconnectTimeoutId = useRef<number | null>(null); // Для хранения ID таймаута
+  const reconnectTimeoutId = useRef<number | null>(null);
   const { sendCursorMsg } = useSessionWS(socket.current, slug);
   const [session, setSession] = useState<Session>();
   const [serverGameMsg, setServerGameMsg] = useState<ServerGameMsgPayload>();
+  const [isSessionFull, setIsSessionFull] = useState(false);
   const reconnectTrys = useRef(0);
   const [userCursorsPositions, setUserCursorsPositions] = useState<
     Record<string, RefObject<Position>>
@@ -38,6 +43,7 @@ export const PlayPage = () => {
 
   const updateMousePositionThrottled = useThrottledCallback((position: Position) => {
     if (session!.participants.length > 1) {
+      return;
       const cursorMsg = createCursorWsMsg(ClientCursorMsgType.Move, position);
       sendCursorMsg(cursorMsg);
     }
@@ -71,11 +77,18 @@ export const PlayPage = () => {
 
       newSocket.onclose = (event) => {
         console.log("WebSocket Connection Closed:", event.code, event.reason);
-        if (event.code === 1006 && reconnectTrys.current < MAX_RECONNECT_TRYS) {
+        if (
+          event.code === SocketErrorCode.AbnormalClosure &&
+          reconnectTrys.current < MAX_RECONNECT_TRYS
+        ) {
           const timeout = reconnectTrys.current * reconnectTrys.current;
           console.log(`Attempting to reconnect in ${timeout} seconds...`);
           reconnectTrys.current = reconnectTrys.current + 1;
           reconnectTimeoutId.current = window.setTimeout(connect, timeout * 1000);
+        } else if (event.code === SocketErrorCode.SessionCompleted) {
+          //
+        } else if (event.code === SocketErrorCode.SessionFull) {
+          setIsSessionFull(true);
         }
       };
 
@@ -132,6 +145,7 @@ export const PlayPage = () => {
       case SessionMsgType.GameStateUpdate:
         return setSession((session) => ({ ...session!, gameState: event.payload }));
       case SessionMsgType.StatusUpdate:
+        console.log("HERE!", event.payload);
         return setSession((session) => ({ ...session!, status: event.payload }));
       case SessionMsgType.UserJoined:
         return setSession((session) => ({
@@ -150,8 +164,16 @@ export const PlayPage = () => {
   };
 
   const updateGameState = (gameState: Record<string, unknown>) => {
-    setSession({ ...session!, gameState });
+    setSession((session) => ({ ...session!, gameState }));
   };
+
+  if (isSessionFull) {
+    return (
+      <div className={styles.statusContainer}>
+        Невозможно подключиться к сессии так как достигнут лимит игроков
+      </div>
+    );
+  }
 
   if (!session) {
     return <Loader text="Подключение к игровой сессии..." />;

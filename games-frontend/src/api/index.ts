@@ -21,6 +21,7 @@ export const API = {
   sessions: {
     createNew: POST<CreateSessionReq, CreateSessionRes>(`sessions/new`),
     join: (sessionId: string) => POST(`sessions/${sessionId}/join`),
+    delete: (sessionId: string) => POST(`sessions/${sessionId}/delete`),
   },
   getUserInfo: GET<User>("me"),
 };

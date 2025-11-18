@@ -29,6 +29,16 @@
     }
   }
 
+  &.danger {
+    background-color: #f44336;
+    border-color: #f44336;
+
+    &:hover {
+      background-color: #d32f2f;
+      border-color: #d32f2f;
+    }
+  }
+
   &.disabled {
     background-color: #3a3a3a;
     border-color: #3a3a3a;

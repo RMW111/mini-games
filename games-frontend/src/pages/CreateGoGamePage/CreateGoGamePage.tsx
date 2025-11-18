@@ -18,15 +18,20 @@ export const CreateGoGamePage = () => {
   const navigate = useNavigate();
   const [boardSize, setBoardSize] = useState<number>(9);
   const [selectedColor, setSelectedColor] = useState<StoneColor>(StoneColor.Black);
+  const [isGameCreating, setIsGameCreating] = useState(false);
 
   const handleCreateGame = () => {
+    setIsGameCreating(true);
     const creationData = {
       boardSize,
       color: selectedColor,
     };
-    API.sessions.createNew({ slug: GameSlug.Go, creationData }).then(({ sessionId }) => {
-      navigate(`/play/${GameSlug.Go}/${sessionId}`, { replace: true });
-    });
+    API.sessions
+      .createNew({ slug: GameSlug.Go, creationData })
+      .then(({ sessionId }) => {
+        navigate(`/play/${GameSlug.Go}/${sessionId}`, { replace: true });
+      })
+      .finally(() => setIsGameCreating(false));
   };
 
   return (
@@ -68,7 +73,10 @@ export const CreateGoGamePage = () => {
         </div>
 
         <div className={styles.actions}>
-          <Button onClick={handleCreateGame}>Создать игру</Button>
+          <Button isLoading={isGameCreating} onClick={handleCreateGame}>
+            Создать игру
+          </Button>
+
           <Button onClick={() => window.history.back()} variant="secondary">
             Отмена
           </Button>

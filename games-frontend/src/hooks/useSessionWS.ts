@@ -6,7 +6,10 @@ import type { ClientCursorMsg } from "src/types/clientCursorMsg.ts";
 
 export const useSessionWS = (socket: WebSocket | null, game: GameSlug) => {
   const stringifyAndSend = (message: ClientMsg) => {
-    socket?.send(JSON.stringify(message));
+    const isSocketOpen = socket?.readyState === WebSocket.OPEN;
+    if (isSocketOpen) {
+      socket?.send(JSON.stringify(message));
+    }
   };
 
   const sendCursorMsg = (payload: ClientCursorMsg) => {

@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 interface Props extends HTMLAttributes<HTMLButtonElement | HTMLAnchorElement> {
   isLoading?: boolean;
   href?: string;
-  variant?: "primary" | "secondary";
+  variant?: "primary" | "secondary" | "danger";
   isDisabled?: boolean;
 }
 
@@ -22,6 +22,7 @@ export const Button = ({
   const classes = cn(styles.button, className, {
     [styles.loading]: isLoading,
     [styles.secondary]: variant === "secondary",
+    [styles.danger]: variant === "danger",
     [styles.disabled]: isDisabled,
   });
 

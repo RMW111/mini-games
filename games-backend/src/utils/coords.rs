@@ -1,7 +1,7 @@
 use crate::models::grid_position::GridPosition;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Copy, Clone, PartialEq, Eq, Debug)]
+#[derive(Serialize, Deserialize, Copy, Clone, PartialEq, Eq, Debug, Hash)]
 pub struct Coords(pub usize, pub usize);
 
 impl From<GridPosition> for Coords {

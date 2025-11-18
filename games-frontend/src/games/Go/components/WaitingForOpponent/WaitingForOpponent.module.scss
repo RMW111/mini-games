@@ -1,0 +1,82 @@
+.waitingPanel {
+  background-color: #242424;
+  padding: 24px;
+  border-radius: 12px;
+  border: 1px solid #444;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  width: 320px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 20px;
+  color: #fff;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: bold;
+  margin: 0;
+  color: #e0e0e0;
+}
+
+.description {
+  font-size: 16px;
+  color: #c0c0c0;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.inviteContainer {
+  display: flex;
+  width: 100%;
+}
+
+.inviteInput {
+  flex-grow: 1;
+  padding: 12px;
+  border: 1px solid #555;
+  background-color: #1a1a1a;
+  color: #fff;
+  font-size: 14px;
+  border-radius: 6px 0 0 6px;
+  font-family: monospace;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  &:focus {
+    outline: none;
+    border-color: #646cff;
+  }
+}
+
+.copyButton {
+  padding: 0;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 0 6px 6px 0;
+
+  &.copied {
+    background-color: #4caf50;
+    border-color: #4caf50;
+    cursor: default;
+
+    &:hover {
+      background-color: #4caf50;
+    }
+  }
+
+  svg {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+.leaveAction {
+  margin-top: 8px;
+  padding-top: 24px;
+  width: 100%;
+  border-top: 1px solid #444;
+}

@@ -9,6 +9,12 @@ export const gamesComponents: Record<GameSlug, ElementType> = {
   [GameSlug.Go]: Go,
 };
 
+export enum SocketErrorCode {
+  AbnormalClosure = 1006,
+  SessionCompleted = 1008,
+  SessionFull = 1009,
+}
+
 export const participantsColors = [
   "#ff0000",
   "#A855F7",

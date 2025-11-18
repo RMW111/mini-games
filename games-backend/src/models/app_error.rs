@@ -10,7 +10,6 @@ pub enum AppError {
     DatabaseError(Error),
     Conflict(String),
     Internal(String),
-    Forbidden(String),
     BadRequest(String),
 }
 
@@ -27,10 +26,6 @@ impl IntoResponse for AppError {
                     StatusCode::INTERNAL_SERVER_ERROR,
                     "An internal error occurred",
                 )
-            }
-            Self::Forbidden(message) => {
-                eprintln!("Access forbidden: {}", message);
-                get_error_response(StatusCode::FORBIDDEN, &message)
             }
             Self::NotFound(message) => get_error_response(StatusCode::NOT_FOUND, &message),
             Self::Conflict(message) => get_error_response(StatusCode::CONFLICT, &message),

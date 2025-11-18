@@ -12,10 +12,13 @@ export const GameLobbyPage = () => {
 
   const [game, setGame] = useState<GameInfo | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [errorStatus, setErrorStatus] = useState<number | null>(null);
+  const [startingGame, setStartingGame] = useState(false);
 
   const [isJoinModalOpen, setJoinModalOpen] = useState(false);
   const [sessionIdInput, setSessionIdInput] = useState("");
   const [joinError, setJoinError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitiing] = useState(false);
 
   useEffect(() => {
     API.games
@@ -33,32 +36,48 @@ export const GameLobbyPage = () => {
   }
 
   const handleNewGame = () => {
+    if (startingGame) return;
+
     if (needAdditionalPrepGames.has(slug!)) {
       navigate(`/create-game/${slug}`);
     } else {
-      API.sessions.createNew({ slug: slug! }).then(({ sessionId }) => {
-        navigate(`/play/${slug}/${sessionId}`);
-      });
+      setStartingGame(true);
+      API.sessions
+        .createNew({ slug: slug! })
+        .then(({ sessionId }) => {
+          navigate(`/play/${slug}/${sessionId}`);
+        })
+        .catch(() => setStartingGame(false));
     }
   };
 
   const handleJoinSession = (event: FormEvent) => {
     event.preventDefault();
+
+    if (isSubmitting) return;
+
     if (!sessionIdInput.trim()) {
       setJoinError("ID сессии не может быть пустым.");
       return;
     }
     setJoinError(null);
+    setErrorStatus(null);
+    setIsSubmitiing(true);
 
     API.sessions
       .join(sessionIdInput.trim())()
       .then(() => navigate(`/play/${game!.slug}/${sessionIdInput.trim()}`))
-      .catch((err) => setJoinError(err.message || "Произошла неизвестная ошибка."));
+      .catch((err) => {
+        setErrorStatus(err.status);
+        setJoinError(err.message || "Произошла неизвестная ошибка.");
+      })
+      .finally(() => setIsSubmitiing(false));
   };
 
   const openJoinModal = () => {
     setSessionIdInput("");
     setJoinError(null);
+    setErrorStatus(null);
     setJoinModalOpen(true);
   };
 
@@ -72,7 +91,7 @@ export const GameLobbyPage = () => {
 
         <div className={styles.actions}>
           <button className={styles.actionButton} onClick={handleNewGame}>
-            Начать новую игру
+            {startingGame ? "Создаём игру..." : "Начать новую игру"}
           </button>
 
           <button
@@ -102,9 +121,11 @@ export const GameLobbyPage = () => {
             value={sessionIdInput}
             onChange={(e) => setSessionIdInput(e.target.value)}
           />
-          {joinError && <div className={styles.modalError}>{joinError}</div>}
+          {joinError && errorStatus !== 409 && <div className={styles.modalError}>{joinError}</div>}
+          {errorStatus === 409 && <div className={styles.modalError}>Сессия заполнена!</div>}
+
           <button type="submit" className={`${styles.actionButton} ${styles.modalButton}`}>
-            Присоединиться
+            {isSubmitting ? "Соединяем..." : "Присоединиться"}
           </button>
         </form>
       </Popup>

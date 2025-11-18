@@ -1,3 +1,4 @@
+use crate::games::go::models::color::StoneColor;
 use crate::utils::coords::Coords;
 use serde::{Deserialize, Serialize};
 
@@ -6,10 +7,15 @@ use serde::{Deserialize, Serialize};
 pub enum GoClientMessage {
     PlaceStone(Coords),
     Pass,
+    CancelScoring,
+    Resign,
+    ToggleEaten(Coords),
+    ApproveScore,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(tag = "type", content = "payload", rename_all = "camelCase")]
 pub enum GoServerMessage {
-    Passed,
+    ScoringCanceled,
+    Resigned(StoneColor),
 }

@@ -86,4 +86,60 @@ impl Board {
 
         None
     }
+
+    pub fn get_territory(
+        &self,
+        coords: Coords,
+        dead_stones: Vec<Coords>,
+    ) -> Option<(Vec<Coords>, Option<StoneColor>)> {
+        if let None = self.get_stone(coords) {
+            let mut territory = vec![];
+            let mut coords_to_check = vec![coords];
+            let mut black_stones_around: usize = 0;
+            let mut white_stones_around: usize = 0;
+
+            while !coords_to_check.is_empty() {
+                let coords = coords_to_check.pop().unwrap();
+
+                if coords.0 >= self.size() || coords.1 >= self.size() {
+                    continue;
+                }
+
+                let dead_stone = dead_stones.contains(&coords);
+
+                if let (Some(stone_color), false) = (self.get_stone(coords), dead_stone) {
+                    if stone_color == StoneColor::Black {
+                        black_stones_around += 1;
+                    } else {
+                        white_stones_around += 1;
+                    }
+                } else {
+                    territory.push(coords);
+
+                    for (offset_row, offset_col) in ADJACENT_POSITIONS {
+                        let row_i_opt = coords.0.checked_add_signed(offset_row);
+                        let col_i_opt = coords.1.checked_add_signed(offset_col);
+
+                        if let (Some(row_i), Some(col_i)) = (row_i_opt, col_i_opt) {
+                            let to_check = Coords(row_i, col_i);
+                            if !territory.contains(&to_check) {
+                                coords_to_check.push(to_check);
+                            }
+                        }
+                    }
+                }
+            }
+
+            let mut who_owns_territory = None;
+            if black_stones_around == 0 && white_stones_around > 0 {
+                who_owns_territory = Some(StoneColor::White);
+            } else if white_stones_around == 0 && black_stones_around > 0 {
+                who_owns_territory = Some(StoneColor::Black);
+            }
+
+            return Some((territory, who_owns_territory));
+        }
+
+        None
+    }
 }

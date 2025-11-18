@@ -12,9 +12,24 @@ export enum StoneColor {
   White = 2,
 }
 
-interface Score {
+export interface Score {
   whiteCaptured: number;
+  whiteTerritory: Coords[];
+  whiteDeadStones: Coords[];
   blackCaptured: number;
+  blackTerritory: Coords[];
+  blackDeadStones: Coords[];
+}
+
+export enum Mode {
+  Playing = "playing",
+  Scoring = "scoring",
+}
+
+export enum WinningReason {
+  Resignation = "resignation",
+  Score = "score",
+  Timeout = "timeout",
 }
 
 export interface GameState {
@@ -25,6 +40,11 @@ export interface GameState {
   ko?: Coords;
   lastStonePlaced?: Coords;
   score: Score;
+  mode: Mode;
+  won?: StoneColor;
+  winningReason?: WinningReason;
+  blackApprovedScore: boolean;
+  whiteApprovedScore: boolean;
 }
 
 export interface Captured {
@@ -35,6 +55,10 @@ export interface Captured {
 export enum GoMsgType {
   PlaceStone = "placeStone",
   Pass = "pass",
+  CancelScoring = "cancelScoring",
+  Resign = "resign",
+  ToggleEaten = "toggleEaten",
+  ApproveScore = "approveScore",
 }
 
 export type GoMsg = WSMsg<GoMsgType.PlaceStone, Coords> | WSMsg<GoMsgType.Pass>;
@@ -42,9 +66,12 @@ export type GoMsg = WSMsg<GoMsgType.PlaceStone, Coords> | WSMsg<GoMsgType.Pass>;
 export type GoMsgPayload = Coords;
 
 export enum GoServerMsgType {
-  Passed = "passed",
+  ScoringCanceled = "scoringCanceled",
+  Resigned = "resigned",
 }
 
-export type GoServerMsg = WSMsg<GoServerMsgType.Passed>;
+export type GoServerMsg =
+  | WSMsg<GoServerMsgType.ScoringCanceled>
+  | WSMsg<GoServerMsgType.Resigned, StoneColor>;
 
 // export type GoServerMsgPayload = ;

@@ -8,11 +8,11 @@ use crate::features::sessions::models::ws_client_messages::{
     ClientMessage, CursorClientMessage, GameClientMessage,
 };
 use crate::features::sessions::models::ws_messages::{ServerMessage, SessionMessage};
+use crate::features::sessions::utils::add_participant_and_notify::add_participant_and_notify;
 use crate::features::sessions::utils::handle_cursor_move_message::handle_cursor_move_message;
 use crate::features::sessions::utils::load_session_with_participants::load_session_with_participants;
 use crate::games::go::utils::handle_message::handle_go_message;
 use crate::games::minesweeper::utils::handle_message::handle_minesweeper_message;
-use crate::models::app_error::AppError;
 use crate::models::session::SessionStatus;
 use crate::models::user::User;
 use axum::extract::ws::{CloseFrame, Message, WebSocket};
@@ -34,28 +34,21 @@ pub async fn ws_handler(
     Path(session_id): Path<Uuid>,
     user: User,
 ) -> Response {
-    let is_participant_result = sqlx::query_scalar!(
-        "SELECT EXISTS(SELECT 1 FROM session_participants WHERE session_id = $1 AND user_id = $2)",
-        session_id,
-        user.id
-    )
-    .fetch_one(&pool)
-    .await;
-
-    let is_participant = match is_participant_result {
-        Ok(Some(exists)) => exists,
-        _ => {
-            return AppError::Internal("Database error while checking participation".to_string())
-                .into_response();
+    match add_participant_and_notify(&pool, &connections, session_id, &user).await {
+        Ok(()) => {
+            ws.on_upgrade(move |socket| handle_socket(socket, pool, connections, session_id, user))
         }
-    };
-
-    if !is_participant {
-        return AppError::Forbidden("You are not a participant in this session.".to_string())
-            .into_response();
+        Err(e) => ws
+            .on_upgrade(|mut socket| async move {
+                let _ = socket
+                    .send(Message::Close(Some(CloseFrame {
+                        code: 1009,
+                        reason: format!("Error: {e}").into(),
+                    })))
+                    .await;
+            })
+            .into_response(),
     }
-
-    ws.on_upgrade(move |socket| handle_socket(socket, pool, connections, session_id, user))
 }
 
 async fn handle_socket(
@@ -120,7 +113,7 @@ async fn handle_socket(
 
         if live_session.session_state.status == SessionStatus::Completed {
             let close_frame = CloseFrame {
-                code: 1000,
+                code: 1008,
                 reason: "Session has already been completed.".into(),
             };
             let _ = sender.send(Message::Close(Some(close_frame))).await;
@@ -238,6 +231,7 @@ async fn handle_game_message(
     live_session: &mut LiveSession,
     handler_data: HandlerData,
 ) {
+    println!("message 111: {:?}", message);
     match message {
         GameClientMessage::Minesweeper(message) => {
             handle_minesweeper_message(message, live_session, handler_data).await
