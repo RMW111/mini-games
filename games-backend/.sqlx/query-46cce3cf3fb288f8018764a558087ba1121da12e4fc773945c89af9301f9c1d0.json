@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT id, slug, name, description FROM games ORDER BY name",
+  "query": "SELECT id, slug, name, description, max_players FROM games WHERE slug = $1",
   "describe": {
     "columns": [
       {
@@ -22,17 +22,25 @@
         "ordinal": 3,
         "name": "description",
         "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "max_players",
+        "type_info": "Int4"
       }
     ],
     "parameters": {
-      "Left": []
+      "Left": [
+        "Text"
+      ]
     },
     "nullable": [
       false,
       false,
       false,
+      true,
       true
     ]
   },
-  "hash": "f13aab024de8e4dea2ae8d470cc2ddf49681b3a4a4f36b0a5561498e44251204"
+  "hash": "46cce3cf3fb288f8018764a558087ba1121da12e4fc773945c89af9301f9c1d0"
 }

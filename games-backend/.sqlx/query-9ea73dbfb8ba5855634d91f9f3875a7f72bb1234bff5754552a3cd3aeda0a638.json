@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT\n            g.max_players,\n            (\n                SELECT COUNT(*)\n                FROM session_participants sp\n                WHERE sp.session_id = gs.id AND sp.role IN ('creator', 'player')\n            ) as \"current_players_count!\"\n        FROM game_sessions gs\n        JOIN games g ON gs.game_id = g.id\n        WHERE gs.id = $1\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "max_players",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "current_players_count!",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true,
+      null
+    ]
+  },
+  "hash": "9ea73dbfb8ba5855634d91f9f3875a7f72bb1234bff5754552a3cd3aeda0a638"
+}

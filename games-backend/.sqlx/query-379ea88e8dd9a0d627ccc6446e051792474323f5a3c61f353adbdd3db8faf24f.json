@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        SELECT p.user_id, u.email, p.role as \"role: _\"\n        FROM session_participants p\n        JOIN users u ON p.user_id = u.id\n        WHERE p.session_id = $1 ORDER BY p.joined_at\n        ",
+  "query": "\n        SELECT p.user_id, u.email, p.role as \"role: _\", u.avatar_url\n        FROM session_participants p\n        JOIN users u ON p.user_id = u.id\n        WHERE p.session_id = $1 ORDER BY p.joined_at\n        ",
   "describe": {
     "columns": [
       {
@@ -28,6 +28,11 @@
             }
           }
         }
+      },
+      {
+        "ordinal": 3,
+        "name": "avatar_url",
+        "type_info": "Text"
       }
     ],
     "parameters": {
@@ -38,8 +43,9 @@
     "nullable": [
       false,
       false,
+      false,
       false
     ]
   },
-  "hash": "09bdd4156f5b6b29d8a7ae0f4e791ed6bd1954c63566bc005ba03d165834485a"
+  "hash": "379ea88e8dd9a0d627ccc6446e051792474323f5a3c61f353adbdd3db8faf24f"
 }
