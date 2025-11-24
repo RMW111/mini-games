@@ -5,16 +5,13 @@ import { TrophyIcon } from "src/components/icons/TrophyIcon.tsx";
 import { useNavigate } from "react-router-dom";
 import { GameSlug } from "src/types/game.ts";
 import type { Session } from "src/types/session.ts";
-
-type PlayerData = { name: string; avatarUrl: string };
+import { ParticipantRole } from "src/types/participant.ts";
 
 interface GameOverPanelProps {
   session: Session<GameState>;
-  blackPlayer: PlayerData;
-  whitePlayer: PlayerData;
 }
 
-export const GameOverPanel = ({ session, blackPlayer, whitePlayer }: GameOverPanelProps) => {
+export const GameOverPanel = ({ session }: GameOverPanelProps) => {
   const navigate = useNavigate();
 
   const territory = {
@@ -24,7 +21,6 @@ export const GameOverPanel = ({ session, blackPlayer, whitePlayer }: GameOverPan
   const komi = 6.5;
 
   const winnerColor = session.gameState.won!;
-  const winnerData = winnerColor === StoneColor.Black ? blackPlayer : whitePlayer;
 
   const blackTotal =
     session.gameState.score.whiteCaptured +
@@ -37,10 +33,19 @@ export const GameOverPanel = ({ session, blackPlayer, whitePlayer }: GameOverPan
     territory.white +
     komi;
 
+  const creator = session.participants.find((x) => x.role === ParticipantRole.Creator);
+  const player = session.participants.find((x) => x.role === ParticipantRole.Player);
+
+  const blackEmail =
+    session.gameState.creatorColor === StoneColor.Black ? creator?.email : player?.email;
+  const whiteEmail =
+    session.gameState.creatorColor === StoneColor.White ? creator?.email : player?.email;
+  const winnerEmail = winnerColor === StoneColor.Black ? blackEmail : whiteEmail;
+
   const scoreDifference = Math.abs(blackTotal - whiteTotal);
 
   const getOutcomeDetails = () => {
-    const winnerName = <strong>{winnerData.name}</strong>;
+    const winnerName = <strong>{winnerEmail}</strong>;
 
     switch (session.gameState.winningReason) {
       case WinningReason.Resignation:
@@ -76,7 +81,7 @@ export const GameOverPanel = ({ session, blackPlayer, whitePlayer }: GameOverPan
       {session.gameState.winningReason === WinningReason.Score && (
         <div className={styles.scoreDetails}>
           <div className={styles.playerScore}>
-            <h4 className={styles.playerName}>{blackPlayer.name} (Чёрные)</h4>
+            <h4 className={styles.playerName}>{blackEmail} (Чёрные)</h4>
             <div className={styles.totalScore}>{blackTotal.toFixed(1)}</div>
             <ul className={styles.breakdown}>
               <li>
@@ -93,7 +98,7 @@ export const GameOverPanel = ({ session, blackPlayer, whitePlayer }: GameOverPan
           </div>
 
           <div className={styles.playerScore}>
-            <h4 className={styles.playerName}>{whitePlayer.name} (Белые)</h4>
+            <h4 className={styles.playerName}>{whiteEmail} (Белые)</h4>
             <div className={styles.totalScore}>{whiteTotal.toFixed(1)}</div>
             <ul className={styles.breakdown}>
               <li>

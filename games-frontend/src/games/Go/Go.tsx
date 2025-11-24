@@ -295,13 +295,7 @@ const Go = ({ socket, session, updateGameState, serverMsg }: GameProps<GameState
         </>
       )}
 
-      {session.status === SessionStatus.Completed && (
-        <GameOverPanel
-          session={session}
-          blackPlayer={{ name: "local@m.ru", avatarUrl: session.participants[0].avatarUrl }}
-          whitePlayer={{ name: "m@m.ru", avatarUrl: session.participants[1].avatarUrl }}
-        />
-      )}
+      {session.status === SessionStatus.Completed && <GameOverPanel session={session} />}
 
       <Popup
         isOpen={isResignPopupOpen}
