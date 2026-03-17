@@ -5,6 +5,7 @@ import { API } from "src/api";
 import { useAtom } from "jotai";
 import { authAtom } from "src/store/auth.ts";
 import { userAtom } from "src/store/user.ts";
+import { extractBackendErrors } from "src/utils/extractBackendErrors.ts";
 
 export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -29,6 +30,13 @@ export const LoginPage: React.FC = () => {
         API.getUserInfo().then(setUser);
         navigate("/games");
         setAuth({ isLoggedIn: true, pending: false });
+      })
+      .catch((error) => {
+        const errors = extractBackendErrors(error);
+        const allErrors = Object.values(errors).flat();
+        if (allErrors[0]) {
+          setError(allErrors[0]);
+        }
       })
       .finally(() => {
         setAuth((prev) => ({ ...prev, pending: false }));

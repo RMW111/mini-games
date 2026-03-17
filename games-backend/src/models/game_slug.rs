@@ -7,6 +7,7 @@ use std::str::FromStr;
 pub enum GameSlug {
     Minesweeper,
     Go,
+    TicTacToe,
 }
 
 impl FromStr for GameSlug {
@@ -16,6 +17,7 @@ impl FromStr for GameSlug {
         match s {
             "minesweeper" => Ok(Self::Minesweeper),
             "go" => Ok(Self::Go),
+            "ticTacToe" => Ok(Self::TicTacToe),
             _ => Err("Unknown slug".into()),
         }
     }
@@ -26,6 +28,7 @@ impl Display for GameSlug {
         let str = match self {
             GameSlug::Minesweeper => String::from("minesweeper"),
             GameSlug::Go => String::from("go"),
+            GameSlug::TicTacToe => String::from("ticTacToe"),
         };
         write!(f, "{}", str)
     }

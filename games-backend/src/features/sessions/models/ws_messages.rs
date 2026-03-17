@@ -1,6 +1,7 @@
 use crate::features::sessions::dtos::participant::ParticipantDTO;
 use crate::features::sessions::dtos::session::SessionDTO;
 use crate::games::go::models::messages::GoServerMessage;
+use crate::games::tic_tac_toe::models::messages::TicTacToeServerMessage;
 use crate::models::cursor::MovePayload;
 use crate::models::session::SessionStatus;
 use serde::Serialize;
@@ -19,6 +20,7 @@ pub enum SessionMessage {
 #[serde(tag = "game", content = "payload", rename_all = "camelCase")]
 pub enum GameMessage {
     Go(GoServerMessage),
+    TicTacToe(TicTacToeServerMessage),
 }
 
 #[derive(Serialize, Debug, Clone)]

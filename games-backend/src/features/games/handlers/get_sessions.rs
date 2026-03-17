@@ -63,7 +63,6 @@ struct SessionQueryResult {
 pub async fn get_sessions(
     DatabaseConnection(pool): DatabaseConnection,
     Path(slug): Path<String>,
-    // todo спросить у нейронки как это работает что при смене типа меняется то, как работает код
     Query(query): Query<GetSessionsQuery>,
 ) -> Result<impl IntoResponse, AppError> {
     let page = query.page;
