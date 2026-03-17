@@ -2,6 +2,7 @@ use crate::games::tic_tac_toe::models::cell::CellValue;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(rename_all = "camelCase")]
 pub struct TicTacToeState {
     pub board: [[CellValue; 3]; 3],
     pub current_turn: CellValue,
