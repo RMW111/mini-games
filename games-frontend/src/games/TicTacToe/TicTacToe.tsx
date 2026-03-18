@@ -100,7 +100,7 @@ const TicTacToe = ({ socket, session }: GameProps<GameState>) => {
         })}
         onClick={() => onCellClick(row, col)}
       >
-        {value === CellValue.X ? "✕" : value === CellValue.O ? "○" : ""}
+        {value === CellValue.X ? "X" : value === CellValue.O ? "O" : ""}
       </div>
     );
   };
