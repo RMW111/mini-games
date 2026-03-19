@@ -8,6 +8,7 @@ pub enum GameSlug {
     Minesweeper,
     Go,
     TicTacToe,
+    Ragnarocks,
 }
 
 impl FromStr for GameSlug {
@@ -18,6 +19,7 @@ impl FromStr for GameSlug {
             "minesweeper" => Ok(Self::Minesweeper),
             "go" => Ok(Self::Go),
             "ticTacToe" => Ok(Self::TicTacToe),
+            "ragnarocks" => Ok(Self::Ragnarocks),
             _ => Err("Unknown slug".into()),
         }
     }
@@ -29,6 +31,7 @@ impl Display for GameSlug {
             GameSlug::Minesweeper => String::from("minesweeper"),
             GameSlug::Go => String::from("go"),
             GameSlug::TicTacToe => String::from("ticTacToe"),
+            GameSlug::Ragnarocks => String::from("ragnarocks"),
         };
         write!(f, "{}", str)
     }

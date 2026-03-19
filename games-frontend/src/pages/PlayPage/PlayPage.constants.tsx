@@ -4,11 +4,13 @@ import { GameSlug } from "src/types/game.ts";
 const Minesweeper = lazy(() => import("../../games/Minesweeper/Minesweeper.tsx"));
 const Go = lazy(() => import("../../games/Go/Go.tsx"));
 const TicTacToe = lazy(() => import("../../games/TicTacToe/TicTacToe.tsx"));
+const Ragnarocks = lazy(() => import("../../games/Ragnarocks/Ragnarocks.tsx"));
 
 export const gamesComponents: Record<GameSlug, ElementType> = {
   [GameSlug.Minesweeper]: Minesweeper,
   [GameSlug.Go]: Go,
   [GameSlug.TicTacToe]: TicTacToe,
+  [GameSlug.Ragnarocks]: Ragnarocks,
 };
 
 export enum SocketErrorCode {

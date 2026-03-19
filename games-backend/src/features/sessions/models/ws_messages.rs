@@ -1,6 +1,7 @@
 use crate::features::sessions::dtos::participant::ParticipantDTO;
 use crate::features::sessions::dtos::session::SessionDTO;
 use crate::games::go::models::messages::GoServerMessage;
+use crate::games::ragnarocks::models::messages::RagnarocksServerMessage;
 use crate::games::tic_tac_toe::models::messages::TicTacToeServerMessage;
 use crate::models::cursor::MovePayload;
 use crate::models::session::SessionStatus;
@@ -21,6 +22,7 @@ pub enum SessionMessage {
 pub enum GameMessage {
     Go(GoServerMessage),
     TicTacToe(TicTacToeServerMessage),
+    Ragnarocks(RagnarocksServerMessage),
 }
 
 #[derive(Serialize, Debug, Clone)]
