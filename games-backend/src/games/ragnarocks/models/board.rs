@@ -355,16 +355,20 @@ impl Board {
     }
 
     /// Check if a player can make any move (has a nomadic viking that can move
-    /// and then place a runestone).
+    /// or stay in place, and then place a runestone).
     pub fn can_player_move(&self, color: PlayerColor) -> bool {
         let nomadic = self.find_nomadic_vikings(color);
 
         for viking_pos in &nomadic {
+            // Check "stay in place": can place runestone from current position?
+            let stay_targets = self.get_reachable_cells(*viking_pos);
+            if !stay_targets.is_empty() {
+                return true;
+            }
+
+            // Check actual moves
             let move_targets = self.get_reachable_cells(*viking_pos);
             for target in &move_targets {
-                // Temporarily move viking to check if runestone can be placed
-                // We need at least one reachable cell from the new position
-                // (excluding the original viking position which is now empty)
                 let mut temp_board = self.clone();
                 temp_board.set(*viking_pos, EMPTY);
                 temp_board.set(*target, cell::viking_value(color));

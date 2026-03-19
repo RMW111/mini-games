@@ -62,6 +62,15 @@ impl<'a> RagnarocksHandler<'a> {
                     self.commit_state_change().await;
                 }
             }
+            RagnarocksClientMessage::CancelMove => {
+                if self
+                    .game_state
+                    .try_cancel_move(self.player_color)
+                    .is_ok()
+                {
+                    self.commit_state_change().await;
+                }
+            }
             RagnarocksClientMessage::Skip => {
                 if self.game_state.try_skip(self.player_color).is_ok() {
                     self.commit_state_change().await;

@@ -29,17 +29,20 @@ export interface GameState {
   redScore: number;
   phase: TurnPhase;
   activeViking: Coords | null;
+  previousVikingPos: Coords | null;
 }
 
 export enum RagnarocksMsgType {
   MoveViking = "moveViking",
   PlaceRunestone = "placeRunestone",
+  CancelMove = "cancelMove",
   Skip = "skip",
 }
 
 export type RagnarocksMsg =
   | WSMsg<RagnarocksMsgType.MoveViking, { from: Coords; to: Coords }>
   | WSMsg<RagnarocksMsgType.PlaceRunestone, Coords>
+  | WSMsg<RagnarocksMsgType.CancelMove>
   | WSMsg<RagnarocksMsgType.Skip>;
 
 export type RagnarocksMsgPayload = { from: Coords; to: Coords } | Coords | undefined;

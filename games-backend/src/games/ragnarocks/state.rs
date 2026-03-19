@@ -23,6 +23,7 @@ pub struct RagnarocksState {
     red_score: u32,
     phase: TurnPhase,
     active_viking: Option<Coords>,
+    previous_viking_pos: Option<Coords>,
 }
 
 impl RagnarocksState {
@@ -49,6 +50,7 @@ impl RagnarocksState {
             red_score: 0,
             phase: TurnPhase::MoveViking,
             active_viking: None,
+            previous_viking_pos: None,
         }
     }
 
@@ -90,6 +92,22 @@ impl RagnarocksState {
             return Err(());
         }
 
+        // Allow staying in place (from == to)
+        if from == to {
+            // Check if the viking can place a runestone from the current position
+            let reachable = self.board.get_reachable_cells(from);
+            if reachable.is_empty() {
+                return Err(());
+            }
+
+            self.phase = TurnPhase::PlaceRunestone;
+            self.active_viking = Some(from);
+            self.previous_viking_pos = Some(from);
+            self.last_skip = false;
+
+            return Ok(());
+        }
+
         // Check the target is empty
         if self.board.get(to) != EMPTY {
             return Err(());
@@ -115,6 +133,7 @@ impl RagnarocksState {
 
         self.phase = TurnPhase::PlaceRunestone;
         self.active_viking = Some(to);
+        self.previous_viking_pos = Some(from);
         self.last_skip = false;
 
         Ok(())
@@ -162,11 +181,47 @@ impl RagnarocksState {
 
         // Switch turn
         self.active_viking = None;
+        self.previous_viking_pos = None;
         self.phase = TurnPhase::MoveViking;
         self.current_turn = get_opposite_color(self.current_turn);
 
         // Check if next player can move; if not, they will need to skip
         // (handled by the skip action)
+
+        Ok(())
+    }
+
+    pub fn try_cancel_move(&mut self, player_color: PlayerColor) -> Result<(), ()> {
+        if self.is_game_over() {
+            return Err(());
+        }
+        if player_color != self.current_turn {
+            return Err(());
+        }
+        if self.phase != TurnPhase::PlaceRunestone {
+            return Err(());
+        }
+
+        let current_pos = match self.active_viking {
+            Some(pos) => pos,
+            None => return Err(()),
+        };
+        let previous_pos = match self.previous_viking_pos {
+            Some(pos) => pos,
+            None => return Err(()),
+        };
+
+        let expected = cell::viking_value(player_color);
+
+        // Move viking back (if it actually moved)
+        if current_pos != previous_pos {
+            self.board.set(current_pos, EMPTY);
+            self.board.set(previous_pos, expected);
+        }
+
+        self.phase = TurnPhase::MoveViking;
+        self.active_viking = None;
+        self.previous_viking_pos = None;
 
         Ok(())
     }

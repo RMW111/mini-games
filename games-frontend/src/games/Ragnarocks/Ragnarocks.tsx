@@ -84,20 +84,24 @@ const Ragnarocks = ({ socket, session }: GameProps<GameState>) => {
   const canSkip = useMemo(() => {
     if (!isMyTurn || phase !== TurnPhase.MoveViking) return false;
 
-    // Check if any nomadic viking can move and then place a runestone
+    // Check if any nomadic viking can move (or stay) and then place a runestone
     for (let row = 0; row < board.length; row++) {
       for (let col = 0; col < board[row].length; col++) {
         if (board[row][col] !== myVikingValue) continue;
         if (!isVikingNomadic(board, row, col)) continue;
 
+        // Check "stay in place": can place runestone from current position?
+        const stayRuneCells = getReachableCells(board, row, col);
+        if (stayRuneCells.length > 0) return false;
+
+        // Check actual moves
         const moveCells = getReachableCells(board, row, col);
         for (const [mr, mc] of moveCells) {
-          // Simulate move
           const tempBoard = board.map((r) => [...r]);
           tempBoard[row][col] = CellValue.Empty;
           tempBoard[mr][mc] = myVikingValue;
           const runeCells = getReachableCells(tempBoard, mr, mc);
-          if (runeCells.length > 0) return false; // Can make a move, so can't skip
+          if (runeCells.length > 0) return false;
         }
       }
     }
@@ -112,10 +116,16 @@ const Ragnarocks = ({ socket, session }: GameProps<GameState>) => {
       if (phase === TurnPhase.MoveViking) {
         const cell = board[row][col];
 
-        // Click on own nomadic viking to select it
+        // Click on own nomadic viking to select/deselect it
         if (cell === myVikingValue && isVikingNomadic(board, row, col)) {
           if (selectedViking && selectedViking[0] === row && selectedViking[1] === col) {
-            setSelectedViking(null); // Deselect
+            // Double-click on selected viking = stay in place (move 0 distance)
+            const msg = createRagnarocksMsg(RagnarocksMsgType.MoveViking, {
+              from: [row, col],
+              to: [row, col],
+            });
+            sendGameMsg(msg);
+            setSelectedViking(null);
           } else {
             setSelectedViking([row, col]);
           }
@@ -144,6 +154,11 @@ const Ragnarocks = ({ socket, session }: GameProps<GameState>) => {
     },
     [isMyTurn, isGameOver, phase, board, myVikingValue, selectedViking, reachableCells, sendGameMsg],
   );
+
+  const handleCancelMove = () => {
+    const msg = createRagnarocksMsg(RagnarocksMsgType.CancelMove);
+    sendGameMsg(msg);
+  };
 
   const handleSkip = () => {
     const msg = createRagnarocksMsg(RagnarocksMsgType.Skip);
@@ -308,6 +323,12 @@ const Ragnarocks = ({ socket, session }: GameProps<GameState>) => {
             <span>{redScore}</span>
           </div>
         </div>
+
+        {isMyTurn && phase === TurnPhase.PlaceRunestone && (
+          <Button className={styles.skipButton} variant="secondary" onClick={handleCancelMove}>
+            Отменить ход
+          </Button>
+        )}
 
         {canSkip && isMyTurn && (
           <Button className={styles.skipButton} onClick={handleSkip}>

@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 pub enum RagnarocksClientMessage {
     MoveViking { from: Coords, to: Coords },
     PlaceRunestone(Coords),
+    CancelMove,
     Skip,
 }
 
