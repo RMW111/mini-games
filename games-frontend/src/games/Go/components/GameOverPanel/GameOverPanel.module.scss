@@ -1,14 +1,16 @@
+@use '../../../../styles/colors' as *;
+
 .gameOverPanel {
-  background-color: #242424;
+  background-color: $bg-card;
   padding: 30px 24px 24px;
   border-radius: 12px;
-  border: 1px solid #444;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  border: 1px solid $border-color;
+  box-shadow: 0 4px 20px $shadow-card;
   width: 320px;
   display: flex;
   flex-direction: column;
   gap: 24px;
-  color: #fff;
+  color: $text-white;
   text-align: center;
 }
 
@@ -22,7 +24,7 @@
 .trophyIcon {
   width: 48px;
   height: 48px;
-  fill: #ffc107;
+  fill: $color-warning;
 }
 
 .title {
@@ -31,18 +33,18 @@
   margin: 0;
 
   strong {
-    color: #8a90ff;
+    color: $color-primary-light;
   }
 }
 
 .description {
   font-size: 16px;
-  color: #c0c0c0;
+  color: $text-secondary;
   margin: 0;
 }
 
 .scoreDetails {
-  background-color: #2c2c2c;
+  background-color: $bg-container;
   border-radius: 8px;
   padding: 16px;
   display: flex;
@@ -59,7 +61,7 @@
   font-weight: 500;
   margin: 0 0 8px 0;
   padding-bottom: 8px;
-  border-bottom: 1px solid #444;
+  border-bottom: 1px solid $border-color;
 }
 
 .totalScore {
@@ -67,7 +69,7 @@
   font-weight: bold;
   text-align: right;
   margin-bottom: 12px;
-  color: #8a90ff;
+  color: $color-primary-light;
 }
 
 .breakdown {
@@ -75,8 +77,7 @@
   padding: 0;
   margin: 0;
   font-size: 14px;
-  color: #a0a0a0;
-  //color: white;
+  color: $text-muted;
 
   li {
     display: flex;
@@ -88,15 +89,15 @@
 .finalMargin {
   font-size: 16px;
   font-weight: bold;
-  color: #8a90ff;
+  color: $color-primary-light;
   font-style: italic;
   margin-top: 8px;
   padding-top: 16px;
-  border-top: 1px solid #444;
+  border-top: 1px solid $border-color;
   text-align: center;
 
   span {
-    color: #ffc107;
+    color: $color-warning;
   }
 }
 

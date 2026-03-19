@@ -1,3 +1,5 @@
+@use '../../styles/colors' as *;
+
 .settingsContainer {
   display: flex;
   flex-direction: column;
@@ -14,7 +16,7 @@
 
 .label {
   font-size: 18px;
-  color: #e0e0e0;
+  color: $text-light;
   font-weight: 500;
 }
 
@@ -27,26 +29,26 @@
 // Старые стили для кнопок размера доски, переименованы для ясности
 .optionButton {
   padding: 12px 24px;
-  border: 1px solid #444;
+  border: 1px solid $border-color;
   border-radius: 6px;
-  background-color: #333;
-  color: #fff;
+  background-color: $bg-dark;
+  color: $text-white;
   font-size: 16px;
   font-weight: bold;
   cursor: pointer;
   transition: all 0.2s ease;
 
   &:hover {
-    background-color: #444;
-    border-color: #535bf2;
+    background-color: $border-color;
+    border-color: $color-primary-hover;
   }
 
   // 👇 Переименовал .sizeButton.active в .active для универсальности
   &.active {
-    background-color: #646cff;
-    border-color: #646cff;
-    color: #fff;
-    box-shadow: 0 0 10px rgba(100, 108, 255, 0.5);
+    background-color: $color-primary;
+    border-color: $color-primary;
+    color: $text-white;
+    box-shadow: 0 0 10px $primary-glow-medium;
     transform: scale(1.05);
   }
 }
@@ -56,27 +58,27 @@
   width: 60px;
   height: 60px;
   border-radius: 50%; // Делаем кнопку круглой, как камень Го
-  border: 3px solid #444;
+  border: 3px solid $border-color;
   cursor: pointer;
   transition: all 0.2s ease;
   box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.4); // Добавим глубины
 
   // Стили для черного камня
   &.black {
-    background-color: #1a1a1a;
+    background-color: $bg-page;
   }
 
   // Стили для белого камня
   &.white {
-    background-color: #f0f0f0;
+    background-color: $bg-light;
     box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.1);
   }
 
   // Активное состояние для камней
   &.active {
-    border-color: #646cff;
+    border-color: $color-primary;
     transform: scale(1.1);
-    box-shadow: 0 0 15px rgba(100, 108, 255, 0.6),
+    box-shadow: 0 0 15px $primary-glow-strong,
     inset 2px 2px 5px rgba(0, 0, 0, 0.4);
   }
 }
@@ -86,5 +88,5 @@
   display: flex;
   gap: 16px;
   padding-top: 24px;
-  border-top: 1px solid #444;
+  border-top: 1px solid $border-color;
 }

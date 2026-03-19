@@ -1,3 +1,5 @@
+@use '../../../../styles/colors' as *;
+
 .stone {
   width: 38px;
   height: 38px;
@@ -23,7 +25,7 @@
   }
 
   &.white {
-    background: radial-gradient(circle at 35% 35%, #fff, #e0e0e0);
+    background: radial-gradient(circle at 35% 35%, $text-white, $text-light);
     box-shadow:
             0 2px 4px rgba(0, 0, 0, 0.3),
             inset -1px -1px 2px rgba(0, 0, 0, 0.1);
@@ -45,9 +47,9 @@
         transform: translate(-50%, -50%);
         font-size: 24px;
         font-weight: bold;
-        color: #ff4d4d;
+        color: $color-error;
         z-index: 2;
-        text-shadow: 0 0 5px rgba(0, 0, 0, 0.7);
+        text-shadow: 0 0 5px $shadow-overlay;
       }
     }
   }

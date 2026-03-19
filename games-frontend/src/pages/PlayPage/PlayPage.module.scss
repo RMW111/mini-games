@@ -1,3 +1,5 @@
+@use '../../styles/colors' as *;
+
 .container {
   padding-top: 40px;
 }
@@ -15,6 +17,6 @@
   min-height: calc(100vh - 68px);
   box-sizing: border-box;
   padding: 40px;
-  background-color: #1a1a1a;
-  color: #fff;
+  background-color: $bg-page;
+  color: $text-white;
 }

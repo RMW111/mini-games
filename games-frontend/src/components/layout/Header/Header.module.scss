@@ -1,23 +1,25 @@
+@use '../../../styles/colors' as *;
+
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #242424;
+  background-color: $bg-card;
   padding: 12px 24px;
-  color: #fff;
+  color: $text-white;
   font-size: 18px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 4px 20px $shadow-card;
 }
 
 .logo {
   font-weight: bold;
   font-size: 20px;
-  color: #646cff;
+  color: $color-primary;
   transition: color 0.3s ease;
   text-decoration: none;
 
   &:hover {
-    color: #535bf2;
+    color: $color-primary-hover;
   }
 }
 
@@ -37,11 +39,11 @@
   height: 40px;
   border-radius: 50%;
   cursor: pointer;
-  border: 2px solid #444;
+  border: 2px solid $border-color;
   transition: border-color 0.3s ease;
 
   &:hover {
-    border-color: #646cff;
+    border-color: $color-primary;
   }
 }
 
@@ -49,11 +51,11 @@
   position: absolute;
   top: 50px;
   right: 0;
-  background-color: #333;
-  border: 1px solid #444;
+  background-color: $bg-dark;
+  border: 1px solid $border-color;
   border-radius: 6px;
   overflow: hidden;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 4px 15px $shadow-modal;
 
   button {
     display: block;
@@ -61,14 +63,14 @@
     padding: 10px 16px;
     background: none;
     border: none;
-    color: #fff;
+    color: $text-white;
     font-size: 14px;
     cursor: pointer;
     text-align: left;
     transition: background-color 0.2s ease;
 
     &:hover {
-      background-color: #535bf2;
+      background-color: $color-primary-hover;
     }
   }
 }

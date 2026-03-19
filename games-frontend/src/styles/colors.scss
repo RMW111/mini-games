@@ -1,0 +1,48 @@
+// Background colors
+$bg-page: #1a1a1a;
+$bg-card: #242424;
+$bg-container: #2c2c2c;
+$bg-dark: #333;
+$bg-disabled: #3a3a3a;
+$bg-light: #f0f0f0;
+
+// Text colors
+$text-white: #fff;
+$text-light: #e0e0e0;
+$text-secondary: #c0c0c0;
+$text-muted: #a0a0a0;
+$text-disabled: #888;
+
+// Primary accent
+$color-primary: #646cff;
+$color-primary-hover: #535bf2;
+$color-primary-light: #8a90ff;
+$color-primary-lightest: #c4c8ff;
+
+// Border colors
+$border-color: #444;
+$border-light: #555;
+
+// Status colors
+$color-error: #ff4d4d;
+$color-danger: #f44336;
+$color-danger-hover: #d32f2f;
+$color-success: #4caf50;
+$color-warning: #ffc107;
+
+// Go game specific
+$color-go-board: #e8b86d;
+
+// Shadows & overlays
+$shadow-card: rgba(0, 0, 0, 0.5);
+$shadow-modal: rgba(0, 0, 0, 0.6);
+$shadow-overlay: rgba(0, 0, 0, 0.7);
+
+// Primary color glows
+$primary-glow-light: rgba(100, 108, 255, 0.1);
+$primary-glow: rgba(100, 108, 255, 0.3);
+$primary-glow-medium: rgba(100, 108, 255, 0.5);
+$primary-glow-strong: rgba(100, 108, 255, 0.6);
+
+// Error background
+$error-bg: rgba(255, 77, 77, 0.1);
