@@ -121,7 +121,6 @@ impl Board {
             let (nc1, nc2) = if shift_diff == -1 {
                 (col, col + 1)
             } else {
-                // shift_diff == +1
                 (col - 1, col)
             };
 
