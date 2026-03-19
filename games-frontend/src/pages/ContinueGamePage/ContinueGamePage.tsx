@@ -18,6 +18,8 @@ const SESSIONS_PER_PAGE = 10;
 const sessionCardInfo: Record<string, ElementType> = {
   [GameSlug.Minesweeper]: MinesweeperSessionInfo,
   [GameSlug.Go]: GoSessionInfo,
+  [GameSlug.TicTacToe]: GoSessionInfo,
+  [GameSlug.Ragnarocks]: GoSessionInfo,
 };
 
 export const ContinueGamePage = () => {

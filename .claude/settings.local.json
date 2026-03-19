@@ -7,7 +7,9 @@
       "mcp__github__get_pull_request_reviews",
       "WebFetch(domain:api.github.com)",
       "Bash(npm test:*)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(cargo check:*)",
+      "Bash(npx tsc:*)"
     ]
   }
 }
