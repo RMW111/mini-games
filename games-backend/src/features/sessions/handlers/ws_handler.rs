@@ -13,6 +13,7 @@ use crate::features::sessions::utils::handle_cursor_move_message::handle_cursor_
 use crate::features::sessions::utils::load_session_with_participants::load_session_with_participants;
 use crate::games::go::utils::handle_message::handle_go_message;
 use crate::games::minesweeper::utils::handle_message::handle_minesweeper_message;
+use crate::games::ragnarocks::utils::handle_message::handle_ragnarocks_message;
 use crate::games::tic_tac_toe::utils::handle_message::handle_tic_tac_toe_message;
 use crate::models::session::SessionStatus;
 use crate::models::user::User;
@@ -242,6 +243,9 @@ async fn handle_game_message(
         }
         GameClientMessage::TicTacToe(message) => {
             handle_tic_tac_toe_message(message, live_session, handler_data).await
+        }
+        GameClientMessage::Ragnarocks(message) => {
+            handle_ragnarocks_message(message, live_session, handler_data).await
         }
     };
 }
