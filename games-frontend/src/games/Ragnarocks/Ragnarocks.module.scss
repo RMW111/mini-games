@@ -1,0 +1,105 @@
+.container {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  justify-content: center;
+  width: 100%;
+  padding: 20px;
+}
+
+.boardContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.sidePanel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 240px;
+  flex-shrink: 0;
+  padding: 16px;
+  border-radius: 12px;
+  background: var(--color-surface, #1e1e2e);
+  border: 1px solid var(--color-border, #333);
+}
+
+.turnIndicator {
+  font-size: 16px;
+  font-weight: 600;
+  text-align: center;
+  padding: 8px;
+  border-radius: 8px;
+  background: var(--color-surface-2, #2a2a3e);
+}
+
+.turnIndicator_myTurn {
+  background: #2d4a2d;
+  color: #8fdf8f;
+}
+
+.scores {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.scoreRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: var(--color-surface-2, #2a2a3e);
+  font-size: 14px;
+}
+
+.scoreLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.colorDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.colorDot_white {
+  background: #e8e8e8;
+  border: 1px solid #999;
+}
+
+.colorDot_red {
+  background: #e05555;
+}
+
+.phaseLabel {
+  font-size: 13px;
+  color: var(--color-text-secondary, #999);
+  text-align: center;
+}
+
+.skipButton {
+  width: 100%;
+}
+
+.gameOverPanel {
+  text-align: center;
+  padding: 20px;
+}
+
+.gameOverTitle {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.waitingText {
+  font-size: 16px;
+  color: var(--color-text-secondary, #999);
+  text-align: center;
+  padding: 20px;
+}

@@ -1,5 +1,6 @@
 use crate::games::go::utils::create_initial_state::create_initial_state as create_initial_go_state;
 use crate::games::minesweeper::utils::create_initial_state::create_initial_state as create_initial_minesweeper_state;
+use crate::games::ragnarocks::utils::create_initial_state::create_initial_state as create_initial_ragnarocks_state;
 use crate::games::tic_tac_toe::utils::create_initial_state::create_initial_state as create_initial_tic_tac_toe_state;
 use crate::models::app_error::AppError;
 use crate::models::game_slug::GameSlug;
@@ -21,6 +22,10 @@ pub fn generate_initial_game_state(
         }
         GameSlug::TicTacToe => {
             let state = create_initial_tic_tac_toe_state();
+            Ok(serde_json::to_value(state).unwrap())
+        }
+        GameSlug::Ragnarocks => {
+            let state = create_initial_ragnarocks_state();
             Ok(serde_json::to_value(state).unwrap())
         }
     }

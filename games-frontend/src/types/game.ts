@@ -2,6 +2,7 @@ export enum GameSlug {
   Minesweeper = "minesweeper",
   Go = "go",
   TicTacToe = "ticTacToe",
+  Ragnarocks = "ragnarocks",
 }
 
 export interface GameInfo {
