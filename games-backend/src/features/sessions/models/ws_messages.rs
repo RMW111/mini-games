@@ -19,6 +19,7 @@ pub enum SessionMessage {
 
 #[derive(Serialize, Debug, Clone)]
 #[serde(tag = "game", content = "payload", rename_all = "camelCase")]
+#[allow(dead_code)]
 pub enum GameMessage {
     Go(GoServerMessage),
     TicTacToe(TicTacToeServerMessage),
