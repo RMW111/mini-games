@@ -1,5 +1,6 @@
 import styles from "./GameOverPanel.module.scss";
 import { Button } from "src/components/ui/Button/Button.tsx";
+import { Panel } from "src/components/ui/Panel/Panel.tsx";
 import { type GameState, StoneColor, WinningReason } from "src/games/Go/Go.types.ts";
 import { TrophyIcon } from "src/components/icons/TrophyIcon.tsx";
 import { useNavigate } from "react-router-dom";
@@ -71,7 +72,7 @@ export const GameOverPanel = ({ session }: GameOverPanelProps) => {
   const { title, description } = getOutcomeDetails();
 
   return (
-    <div className={styles.gameOverPanel}>
+    <Panel className={styles.gameOverPanel}>
       <div className={styles.header}>
         <TrophyIcon className={styles.trophyIcon} />
         <h2 className={styles.title}>{title}</h2>
@@ -129,6 +130,6 @@ export const GameOverPanel = ({ session }: GameOverPanelProps) => {
           Выйти
         </Button>
       </div>
-    </div>
+    </Panel>
   );
 };

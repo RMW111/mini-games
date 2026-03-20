@@ -1,0 +1,10 @@
+@use '../../../styles/colors' as *;
+
+.gameLayout {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 40px;
+  background-color: $bg-page;
+  font-family: 'Inter', sans-serif;
+}

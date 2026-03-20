@@ -1,13 +1,9 @@
 @use '../../styles/colors' as *;
 
+$color-go-board: #e8b86d;
+
 .container {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
   padding-bottom: 40px;
-  gap: 40px;
-  background-color: $bg-page;
-  font-family: 'Inter', sans-serif;
 }
 
 .gameWrapper {

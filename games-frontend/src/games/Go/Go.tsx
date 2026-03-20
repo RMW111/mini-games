@@ -28,6 +28,7 @@ import { GameOverPanel } from "src/games/Go/components/GameOverPanel/GameOverPan
 import { Popup } from "src/components/ui/Popup/Popup.tsx";
 import { Button } from "src/components/ui/Button/Button.tsx";
 import { WarningIcon } from "src/components/icons/WarningIcon.tsx";
+import { GameLayout } from "src/components/layout/GameLayout/GameLayout.tsx";
 
 const lineGaps = 38;
 const lineWidth = 1;
@@ -259,7 +260,7 @@ const Go = ({ socket, session, updateGameState, serverMsg }: GameProps<GameState
     );
 
   return (
-    <div className={styles.container}>
+    <GameLayout className={styles.container}>
       <div className={styles.gameWrapper} onContextMenu={(e) => e.preventDefault()}>
         <div className={styles.boardContainer}>
           <div className={styles.board} style={{ width: boardWidth, height: boardWidth }}>
@@ -319,7 +320,7 @@ const Go = ({ socket, session, updateGameState, serverMsg }: GameProps<GameState
           </div>
         </div>
       </Popup>
-    </div>
+    </GameLayout>
   );
 };
 
