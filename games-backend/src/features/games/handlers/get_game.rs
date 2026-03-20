@@ -11,7 +11,7 @@ pub async fn get_game(
 ) -> Result<impl IntoResponse, AppError> {
     let game = sqlx::query_as!(
         GameDTO,
-        "SELECT id, slug, name, description, max_players FROM games WHERE slug = $1",
+        "SELECT id, slug, name, description, max_players, image_url FROM games WHERE slug = $1",
         slug
     )
     .fetch_one(&pool)

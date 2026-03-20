@@ -9,4 +9,5 @@ pub struct GameDTO {
     pub name: String,
     pub description: Option<String>,
     pub max_players: Option<i32>,
+    pub image_url: Option<String>,
 }
