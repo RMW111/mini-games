@@ -1,10 +1,12 @@
+@use '../../../styles/colors' as *;
+
 .overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: $shadow-overlay;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -13,10 +15,10 @@
 }
 
 .modal {
-  background-color: #242424;
+  background-color: $bg-card;
   padding: 24px 32px;
   border-radius: 8px;
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 4px 30px $shadow-modal;
   width: 100%;
   max-width: 450px;
   text-align: left;
@@ -33,25 +35,25 @@
 .title {
   margin: 0;
   font-size: 22px;
-  color: #fff;
+  color: $text-white;
 }
 
 .closeButton {
   background: none;
   border: none;
-  color: #888;
+  color: $text-disabled;
   font-size: 32px;
   cursor: pointer;
   line-height: 1;
   transition: color 0.2s ease;
 
   &:hover {
-    color: #fff;
+    color: $text-white;
   }
 }
 
 .content {
-  color: #c0c0c0;
+  color: $text-secondary;
 }
 
 @keyframes fadeIn {

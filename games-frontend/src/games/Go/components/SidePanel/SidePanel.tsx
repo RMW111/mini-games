@@ -1,5 +1,6 @@
 import styles from "./SidePanel.module.scss";
 import { Button } from "src/components/ui/Button/Button.tsx";
+import { Panel } from "src/components/ui/Panel/Panel.tsx";
 import { PlayerInfo } from "src/games/Go/components/PlayerInfo/PlayerInfo.tsx";
 import { CheckIcon } from "src/components/icons/CheckIcon.tsx";
 import { CrossIcon } from "src/components/icons/CrossIcon.tsx";
@@ -97,7 +98,7 @@ export const SidePanel = ({
       : session.gameState.blackApprovedScore;
 
   return (
-    <div className={styles.sidePanel}>
+    <Panel>
       <div className={styles.playersContainer}>
         <PlayerInfo
           name={player1.email}
@@ -180,6 +181,6 @@ export const SidePanel = ({
           </div>
         </div>
       )}
-    </div>
+    </Panel>
   );
 };

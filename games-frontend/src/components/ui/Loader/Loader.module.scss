@@ -1,3 +1,5 @@
+@use '../../../styles/colors' as *;
+
 .container {
   display: flex;
   flex-direction: column;
@@ -5,14 +7,14 @@
   align-items: center;
   min-height: 300px;
   padding: 40px;
-  background-color: #1a1a1a;
+  background-color: $bg-page;
 }
 
 .spinner {
   width: 60px;
   height: 60px;
-  border: 5px solid #444; // Цвет "трека" спиннера
-  border-top-color: #646cff; // Акцентный цвет вашего сайта
+  border: 5px solid $border-color; // Цвет "трека" спиннера
+  border-top-color: $color-primary; // Акцентный цвет вашего сайта
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -20,7 +22,7 @@
 .text {
   margin-top: 24px;
   font-size: 18px;
-  color: #c0c0c0;
+  color: $text-secondary;
 }
 
 @keyframes spin {

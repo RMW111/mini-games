@@ -1,8 +1,10 @@
+@use '../../../styles/colors' as *;
+
 .createGameLayout {
-  background-color: #242424;
+  background-color: $bg-card;
   padding: 40px;
   border-radius: 8px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 4px 20px $shadow-card;
   width: 100%;
   max-width: 700px;
   margin: 40px auto;
@@ -11,7 +13,7 @@
 .header {
   text-align: center;
   margin-bottom: 32px;
-  border-bottom: 1px solid #444;
+  border-bottom: 1px solid $border-color;
   padding-bottom: 24px;
 }
 
@@ -19,12 +21,12 @@
   font-size: 32px;
   font-weight: bold;
   margin: 0 0 12px 0;
-  color: #fff;
+  color: $text-white;
 }
 
 .description {
   font-size: 18px;
-  color: #c0c0c0;
+  color: $text-secondary;
   line-height: 1.6;
   margin: 0;
 }
