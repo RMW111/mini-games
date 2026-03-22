@@ -1,3 +1,3 @@
 import { GameSlug } from "src/types/game.ts";
 
-export const needAdditionalPrepGames = new Set([GameSlug.Go]);
+export const needAdditionalPrepGames = new Set([GameSlug.Go, GameSlug.Ragnarocks]);

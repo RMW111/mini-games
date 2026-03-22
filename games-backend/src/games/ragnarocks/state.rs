@@ -1,6 +1,7 @@
-use crate::games::ragnarocks::models::board::Board;
+use crate::games::ragnarocks::models::board::{Board, row_sizes_for};
 use crate::games::ragnarocks::models::cell::{self, EMPTY, RUNESTONE};
 use crate::games::ragnarocks::models::color::{get_opposite_color, PlayerColor};
+use crate::games::ragnarocks::models::creation_data::{BoardSize, CreationData};
 use crate::utils::coords::Coords;
 use serde::{Deserialize, Serialize};
 
@@ -27,21 +28,42 @@ pub struct RagnarocksState {
 }
 
 impl RagnarocksState {
-    pub fn new() -> Self {
-        let mut board = Board::new();
+    pub fn new(data: CreationData) -> Self {
+        let row_sizes = row_sizes_for(data.board_size);
+        let mut board = Board::new(row_sizes);
+        let last_row = row_sizes.len() - 1;
 
-        // Place White Vikings on row 0 (5 cells), middle 3: cols 1, 2, 3
-        board.set(Coords(0, 1), cell::WHITE_VIKING);
-        board.set(Coords(0, 2), cell::WHITE_VIKING);
-        board.set(Coords(0, 3), cell::WHITE_VIKING);
+        match data.board_size {
+            BoardSize::Small => {
+                // 3 White Vikings on row 0 (5 cells), cols 1, 2, 3
+                board.set(Coords(0, 1), cell::WHITE_VIKING);
+                board.set(Coords(0, 2), cell::WHITE_VIKING);
+                board.set(Coords(0, 3), cell::WHITE_VIKING);
 
-        // Place Red Vikings on row 9 (9 cells), middle 3: cols 3, 4, 5
-        board.set(Coords(9, 3), cell::RED_VIKING);
-        board.set(Coords(9, 4), cell::RED_VIKING);
-        board.set(Coords(9, 5), cell::RED_VIKING);
+                // 3 Red Vikings on last row (9 cells), cols 3, 4, 5
+                board.set(Coords(last_row, 3), cell::RED_VIKING);
+                board.set(Coords(last_row, 4), cell::RED_VIKING);
+                board.set(Coords(last_row, 5), cell::RED_VIKING);
+            }
+            BoardSize::Large => {
+                // 5 White Vikings on row 0 (7 cells), cols 1, 2, 3, 4, 5
+                board.set(Coords(0, 1), cell::WHITE_VIKING);
+                board.set(Coords(0, 2), cell::WHITE_VIKING);
+                board.set(Coords(0, 3), cell::WHITE_VIKING);
+                board.set(Coords(0, 4), cell::WHITE_VIKING);
+                board.set(Coords(0, 5), cell::WHITE_VIKING);
+
+                // 5 Red Vikings on last row (11 cells), cols 3, 4, 5, 6, 7
+                board.set(Coords(last_row, 3), cell::RED_VIKING);
+                board.set(Coords(last_row, 4), cell::RED_VIKING);
+                board.set(Coords(last_row, 5), cell::RED_VIKING);
+                board.set(Coords(last_row, 6), cell::RED_VIKING);
+                board.set(Coords(last_row, 7), cell::RED_VIKING);
+            }
+        }
 
         Self {
-            creator_color: PlayerColor::White,
+            creator_color: data.color,
             current_turn: PlayerColor::White,
             board,
             last_skip: false,
@@ -185,9 +207,6 @@ impl RagnarocksState {
         self.phase = TurnPhase::MoveViking;
         self.current_turn = get_opposite_color(self.current_turn);
 
-        // Check if next player can move; if not, they will need to skip
-        // (handled by the skip action)
-
         Ok(())
     }
 
@@ -253,9 +272,6 @@ impl RagnarocksState {
             } else if red_score > white_score {
                 self.won = Some(PlayerColor::Red);
             } else {
-                // Tie — second player (Red) wins? Or just pick one.
-                // Per standard rules, we'll say the player with more territory wins.
-                // On exact tie, we can let white win (first player disadvantage offset).
                 self.won = Some(PlayerColor::White);
             }
         } else {

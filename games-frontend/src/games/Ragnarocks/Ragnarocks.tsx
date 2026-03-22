@@ -21,7 +21,6 @@ import { ParticipantRole } from "src/types/participant.ts";
 import { SessionStatus } from "src/types/session.ts";
 import type { GameProps } from "src/types/gameProps.ts";
 import { userAtom } from "src/store/user.ts";
-import { API } from "src/api";
 import HexBoard from "./components/HexBoard.tsx";
 import GamePanel from "./components/GamePanel.tsx";
 
@@ -31,7 +30,6 @@ const Ragnarocks = ({ socket, session }: GameProps<GameState>) => {
   const { slug } = useParams<{ slug: string }>();
   const { sendGameMsg } = useSessionWS(socket.current, GameSlug.Ragnarocks);
   const [selectedViking, setSelectedViking] = useState<[number, number] | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
 
   const { board, currentTurn, phase, activeViking, won, whiteScore, redScore } =
     session.gameState;
@@ -150,13 +148,7 @@ const Ragnarocks = ({ socket, session }: GameProps<GameState>) => {
   };
 
   const handleNewGame = () => {
-    setIsLoading(true);
-    API.sessions
-      .createNew({ slug: slug! })
-      .then(({ sessionId }) => {
-        navigate(`/play/${slug}/${sessionId}`, { replace: true });
-      })
-      .finally(() => setIsLoading(false));
+    navigate(`/create-game/${slug}`);
   };
 
   return (
@@ -182,7 +174,6 @@ const Ragnarocks = ({ socket, session }: GameProps<GameState>) => {
         whiteScore={whiteScore}
         redScore={redScore}
         canSkip={canSkip}
-        isLoading={isLoading}
         selectedViking={selectedViking}
         onCancelMove={handleCancelMove}
         onSkip={handleSkip}
