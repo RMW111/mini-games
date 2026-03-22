@@ -1,58 +1,145 @@
+@use '../../styles/colors' as *;
+
 .container {
   display: flex;
-  gap: 24px;
+  gap: 32px;
   align-items: flex-start;
   justify-content: center;
   width: 100%;
   padding: 20px;
 }
 
+// ─── Board ───────────────────────────────────────────────
+
 .boardContainer {
   display: flex;
   justify-content: center;
   align-items: center;
+  background: $bg-card;
+  border-radius: 16px;
+  border: 1px solid $border-color;
+  padding: 24px;
 }
 
-.sidePanel {
+// ─── Side Panel ──────────────────────────────────────────
+
+.panel {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  width: 240px;
+  width: 280px;
   flex-shrink: 0;
-  padding: 16px;
+  padding: 20px;
   border-radius: 12px;
-  background: var(--color-surface, #1e1e2e);
-  border: 1px solid var(--color-border, #333);
+  background: $bg-card;
 }
 
-.turnIndicator {
-  font-size: 16px;
+// Status badge (pill)
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 100px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
   font-weight: 600;
-  text-align: center;
-  padding: 8px;
-  border-radius: 8px;
-  background: var(--color-surface-2, #2a2a3e);
+  letter-spacing: 2px;
+  width: fit-content;
 }
 
-.turnIndicator_myTurn {
-  background: #2d4a2d;
-  color: #8fdf8f;
+.badge_success {
+  background: rgba($color-success, 0.1);
+  color: $color-success;
 }
 
+.badge_primary {
+  background: $primary-glow-light;
+  color: $color-primary;
+}
+
+.badge_error {
+  background: rgba($color-error, 0.1);
+  color: $color-error;
+}
+
+// Title
+.title {
+  font-family: 'Inter', sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: $text-white;
+}
+
+.title_victory {
+  font-size: 20px;
+  font-weight: 700;
+  color: $color-primary;
+}
+
+.title_defeat {
+  font-size: 20px;
+  font-weight: 700;
+  color: $color-error;
+}
+
+// Subtitle
+.subtitle {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  color: $text-muted;
+}
+
+// Loading dots
+.loadingDots {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.loadingDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: $color-primary;
+  animation: dotPulse 1.4s infinite ease-in-out;
+
+  &:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+
+  &:nth-child(3) {
+    animation-delay: 0.4s;
+  }
+}
+
+@keyframes dotPulse {
+  0%, 80%, 100% {
+    opacity: 0.2;
+  }
+  40% {
+    opacity: 1;
+  }
+}
+
+// Divider
+.divider {
+  width: 100%;
+  height: 1px;
+  background: $border-color;
+}
+
+// Scores
 .scores {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
 .scoreRow {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 6px 10px;
-  border-radius: 6px;
-  background: var(--color-surface-2, #2a2a3e);
-  font-size: 14px;
 }
 
 .scoreLabel {
@@ -62,44 +149,91 @@
 }
 
 .colorDot {
-  width: 12px;
-  height: 12px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
 }
 
 .colorDot_white {
-  background: #e8e8e8;
-  border: 1px solid #999;
+  background: #ffffff;
 }
 
 .colorDot_red {
-  background: #e05555;
+  background: $color-error;
 }
 
-.phaseLabel {
-  font-size: 13px;
-  color: var(--color-text-secondary, #999);
-  text-align: center;
+.scoreName {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: $text-secondary;
 }
 
-.skipButton {
+.scoreValue {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 18px;
+  font-weight: 700;
+  color: $text-white;
+}
+
+.scoreValue_highlight {
+  color: $color-primary;
+}
+
+// Big score (game over)
+.bigScore {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px 0;
   width: 100%;
 }
 
-.gameOverPanel {
-  text-align: center;
-  padding: 20px;
-}
-
-.gameOverTitle {
-  font-size: 20px;
+.bigScoreNumber {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 40px;
   font-weight: 700;
-  margin-bottom: 12px;
 }
 
-.waitingText {
-  font-size: 16px;
-  color: var(--color-text-secondary, #999);
-  text-align: center;
-  padding: 20px;
+.bigScoreNumber_winner {
+  color: $color-primary;
+}
+
+.bigScoreNumber_loser {
+  color: $text-muted;
+}
+
+.bigScoreSeparator {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 32px;
+  color: $text-muted;
+}
+
+// Cancel button (outlined)
+.cancelBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 10px 0;
+  border-radius: 8px;
+  border: 1px solid $border-light;
+  background: transparent;
+  color: $text-secondary;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: $text-muted;
+  }
+}
+
+// New game button
+.newGameBtn {
+  width: 100%;
 }
