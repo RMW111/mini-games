@@ -152,7 +152,8 @@ const HexBoard = ({
     return "default";
   };
 
-  const baseCells: React.ReactNode[] = [];
+  const emptyCells: React.ReactNode[] = [];
+  const occupiedCells: React.ReactNode[] = [];
   const highlightedCells: React.ReactNode[] = [];
 
   board.forEach((row, rowI) =>
@@ -181,8 +182,10 @@ const HexBoard = ({
 
       if (isReachable || isSelected) {
         highlightedCells.push(node);
+      } else if (cell !== CellValue.Empty) {
+        occupiedCells.push(node);
       } else {
-        baseCells.push(node);
+        emptyCells.push(node);
       }
     }),
   );
@@ -194,7 +197,8 @@ const HexBoard = ({
         height={boardHeight}
         viewBox={`0 0 ${boardWidth} ${boardHeight}`}
       >
-        {baseCells}
+        {emptyCells}
+        {occupiedCells}
         {highlightedCells}
       </svg>
     </div>
