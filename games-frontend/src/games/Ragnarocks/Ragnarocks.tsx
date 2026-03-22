@@ -38,8 +38,8 @@ import { API } from "src/api";
 const COLORS = {
   cellEmpty: "#2c2c2c",
   cellEmptyStroke: "#444444",
-  cellReachable: "#3a4a3a",
-  cellReachableStroke: "#4caf50",
+  cellReachable: "rgba(100, 108, 255, 0.12)",
+  cellReachableStroke: "#646cff",
   cellSelected: "#4caf50",
   cellSelectedStroke: "#388e3c",
   whiteViking: "#e0e0e0",
@@ -243,44 +243,82 @@ const Ragnarocks = ({ socket, session }: GameProps<GameState>) => {
     return "default";
   };
 
-  // ─── SVG hex rendering ─────────────────────────────────
+  // ─── SVG icon helpers ────────────────────────────────────
 
-  const hexes = board.flatMap((row, rowI) =>
-    row.map((cell, colI) => {
+  const renderViking = (cx: number, cy: number, color: "white" | "red") => {
+    const fill = color === "white" ? "#ffffff" : "#ff4d4d";
+    const stroke = color === "white" ? "#aaaaaa" : "#cc3333";
+    const r = HEX_SIZE * 0.32;
+    return (
+      <g style={{ pointerEvents: "none" }}>
+        {/* Shield body */}
+        <path
+          d={`M ${cx} ${cy - r * 1.1}
+              C ${cx + r * 1.2} ${cy - r * 1.1}, ${cx + r * 1.2} ${cy + r * 0.3}, ${cx} ${cy + r * 1.3}
+              C ${cx - r * 1.2} ${cy + r * 0.3}, ${cx - r * 1.2} ${cy - r * 1.1}, ${cx} ${cy - r * 1.1} Z`}
+          fill={fill}
+          stroke={stroke}
+          strokeWidth={1.2}
+        />
+        {/* Shield cross */}
+        <line x1={cx} y1={cy - r * 0.8} x2={cx} y2={cy + r * 1.0} stroke={stroke} strokeWidth={1} />
+        <line x1={cx - r * 0.8} y1={cy - r * 0.1} x2={cx + r * 0.8} y2={cy - r * 0.1} stroke={stroke} strokeWidth={1} />
+      </g>
+    );
+  };
+
+  const renderRunestone = (cx: number, cy: number) => {
+    const s = HEX_SIZE * 0.3;
+    return (
+      <g style={{ pointerEvents: "none" }}>
+        <polygon
+          points={`${cx},${cy - s * 1.2} ${cx + s * 0.9},${cy} ${cx},${cy + s * 1.2} ${cx - s * 0.9},${cy}`}
+          fill="#888888"
+          stroke="#aaaaaa"
+          strokeWidth={1.2}
+        />
+        {/* Rune mark */}
+        <line x1={cx} y1={cy - s * 0.6} x2={cx} y2={cy + s * 0.6} stroke="#cccccc" strokeWidth={1.2} />
+        <line x1={cx - s * 0.35} y1={cy - s * 0.2} x2={cx + s * 0.35} y2={cy + s * 0.2} stroke="#cccccc" strokeWidth={1} />
+      </g>
+    );
+  };
+
+  // ─── SVG hex rendering ─────────────────────────────────
+  // Render in two passes: base cells first, then highlighted cells on top
+  // so their strokes are fully visible on all edges.
+
+  const baseCells: React.ReactNode[] = [];
+  const highlightedCells: React.ReactNode[] = [];
+
+  board.forEach((row, rowI) =>
+    row.forEach((cell, colI) => {
       const { x, y } = hexToPixel(rowI, colI);
-      return (
-        <g key={`${rowI}-${colI}`} onClick={() => handleCellClick(rowI, colI)}>
+      const key = `${rowI},${colI}`;
+      const isReachable = reachableCells.has(key);
+      const isSelected =
+        selectedViking && selectedViking[0] === rowI && selectedViking[1] === colI;
+
+      const node = (
+        <g key={key} onClick={() => handleCellClick(rowI, colI)}>
           <polygon
             points={hexPoints(x, y)}
             fill={getCellFill(cell, rowI, colI)}
             stroke={getCellStroke(cell, rowI, colI)}
-            strokeWidth={1.5}
+            strokeWidth={isReachable || isSelected ? 2 : 1.5}
             style={{ cursor: getCellCursor(cell, rowI, colI) }}
           />
-          {(cell === CellValue.WhiteViking || cell === CellValue.RedViking) && (
-            <text
-              x={x}
-              y={y + 5}
-              textAnchor="middle"
-              fontSize={HEX_SIZE * 0.8}
-              style={{ pointerEvents: "none", userSelect: "none" }}
-            >
-              ⛵
-            </text>
-          )}
-          {cell === CellValue.Runestone && (
-            <text
-              x={x}
-              y={y + 5}
-              textAnchor="middle"
-              fontSize={HEX_SIZE * 0.7}
-              style={{ pointerEvents: "none", userSelect: "none" }}
-            >
-              ᛟ
-            </text>
-          )}
+          {(cell === CellValue.WhiteViking || cell === CellValue.RedViking) &&
+            renderViking(x, y, cell === CellValue.WhiteViking ? "white" : "red")}
+          {cell === CellValue.Runestone && renderRunestone(x, y)}
         </g>
       );
+
+      if (isReachable || isSelected) {
+        highlightedCells.push(node);
+      } else {
+        baseCells.push(node);
+      }
     }),
   );
 
@@ -436,7 +474,8 @@ const Ragnarocks = ({ socket, session }: GameProps<GameState>) => {
           height={BOARD_HEIGHT}
           viewBox={`0 0 ${BOARD_WIDTH} ${BOARD_HEIGHT}`}
         >
-          {hexes}
+          {baseCells}
+          {highlightedCells}
         </svg>
       </div>
 
