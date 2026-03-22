@@ -25,7 +25,7 @@ pub fn generate_initial_game_state(
             Ok(serde_json::to_value(state).unwrap())
         }
         GameSlug::Ragnarocks => {
-            let state = create_initial_ragnarocks_state();
+            let state = create_initial_ragnarocks_state(creation_data)?;
             Ok(serde_json::to_value(state).unwrap())
         }
     }

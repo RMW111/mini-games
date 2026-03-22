@@ -1,10 +1,12 @@
+import { useMemo } from "react";
 import { CellValue, TurnPhase } from "src/games/Ragnarocks/Ragnarocks.types.ts";
 import {
-  BOARD_HEIGHT,
-  BOARD_WIDTH,
   HEX_SIZE,
   hexPoints,
   hexToPixel,
+  computeLeftOffsets,
+  computeBoardWidth,
+  computeBoardHeight,
 } from "src/games/Ragnarocks/Ragnarocks.constants.ts";
 import { isVikingNomadic } from "src/games/Ragnarocks/Ragnarocks.utils.ts";
 import styles from "../Ragnarocks.module.scss";
@@ -94,6 +96,11 @@ const HexBoard = ({
   myVikingValue,
   onCellClick,
 }: HexBoardProps) => {
+  const rowSizes = useMemo(() => board.map((r) => r.length), [board]);
+  const leftOffsets = useMemo(() => computeLeftOffsets(rowSizes), [rowSizes]);
+  const boardWidth = useMemo(() => computeBoardWidth(rowSizes, leftOffsets), [rowSizes, leftOffsets]);
+  const boardHeight = useMemo(() => computeBoardHeight(board.length), [board.length]);
+
   const getCellFill = (cellValue: number, row: number, col: number) => {
     const isSelected =
       selectedViking && selectedViking[0] === row && selectedViking[1] === col;
@@ -150,7 +157,7 @@ const HexBoard = ({
 
   board.forEach((row, rowI) =>
     row.forEach((cell, colI) => {
-      const { x, y } = hexToPixel(rowI, colI);
+      const { x, y } = hexToPixel(rowI, colI, leftOffsets);
       const key = `${rowI},${colI}`;
       const isReachable = reachableCells.has(key);
       const isSelected =
@@ -183,9 +190,9 @@ const HexBoard = ({
   return (
     <div className={styles.boardContainer}>
       <svg
-        width={BOARD_WIDTH}
-        height={BOARD_HEIGHT}
-        viewBox={`0 0 ${BOARD_WIDTH} ${BOARD_HEIGHT}`}
+        width={boardWidth}
+        height={boardHeight}
+        viewBox={`0 0 ${boardWidth} ${boardHeight}`}
       >
         {baseCells}
         {highlightedCells}

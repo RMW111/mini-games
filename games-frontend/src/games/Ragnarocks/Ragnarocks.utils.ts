@@ -6,7 +6,7 @@ import {
   type RagnarocksMsgPayload,
   type RagnarocksMsgType,
 } from "src/games/Ragnarocks/Ragnarocks.types.ts";
-import { LEFT_OFFSETS, ROW_SIZES } from "src/games/Ragnarocks/Ragnarocks.constants.ts";
+import { computeLeftOffsets } from "src/games/Ragnarocks/Ragnarocks.constants.ts";
 
 export const createRagnarocksMsg = (type: RagnarocksMsgType, payload?: RagnarocksMsgPayload) =>
   createWsMsg(type, payload) as RagnarocksMsg;
@@ -14,8 +14,8 @@ export const createRagnarocksMsg = (type: RagnarocksMsgType, payload?: Ragnarock
 export const getOppositeColor = (color: PlayerColor) =>
   color === PlayerColor.White ? PlayerColor.Red : PlayerColor.White;
 
-export const isValidCell = (row: number, col: number): boolean =>
-  row >= 0 && row < ROW_SIZES.length && col >= 0 && col < ROW_SIZES[row];
+export const isValidCell = (board: number[][], row: number, col: number): boolean =>
+  row >= 0 && row < board.length && col >= 0 && col < board[row].length;
 
 export const isOccupied = (cell: number): boolean => cell !== CellValue.Empty;
 
@@ -25,10 +25,13 @@ export const isOccupied = (cell: number): boolean => cell !== CellValue.Empty;
  * Directions: 0=E, 1=W, 2=NE, 3=NW, 4=SE, 5=SW
  */
 export function hexStep(
+  board: number[][],
   row: number,
   col: number,
   direction: number,
 ): [number, number] | null {
+  const rowSizes = board.map((r) => r.length);
+  const leftOffsets = computeLeftOffsets(rowSizes);
   let nr: number, nc: number;
 
   switch (direction) {
@@ -43,28 +46,28 @@ export function hexStep(
     case 2: { // NE
       nr = row - 1;
       if (nr < 0) return null;
-      const shift = LEFT_OFFSETS[nr] - LEFT_OFFSETS[row];
+      const shift = leftOffsets[nr] - leftOffsets[row];
       nc = shift === -1 ? col + 1 : col;
       break;
     }
     case 3: { // NW
       nr = row - 1;
       if (nr < 0) return null;
-      const shift = LEFT_OFFSETS[nr] - LEFT_OFFSETS[row];
+      const shift = leftOffsets[nr] - leftOffsets[row];
       nc = shift === -1 ? col : col - 1;
       break;
     }
     case 4: { // SE
       nr = row + 1;
-      if (nr >= ROW_SIZES.length) return null;
-      const shift = LEFT_OFFSETS[nr] - LEFT_OFFSETS[row];
+      if (nr >= board.length) return null;
+      const shift = leftOffsets[nr] - leftOffsets[row];
       nc = shift === -1 ? col + 1 : col;
       break;
     }
     case 5: { // SW
       nr = row + 1;
-      if (nr >= ROW_SIZES.length) return null;
-      const shift = LEFT_OFFSETS[nr] - LEFT_OFFSETS[row];
+      if (nr >= board.length) return null;
+      const shift = leftOffsets[nr] - leftOffsets[row];
       nc = shift === -1 ? col : col - 1;
       break;
     }
@@ -72,7 +75,7 @@ export function hexStep(
       return null;
   }
 
-  if (!isValidCell(nr, nc)) return null;
+  if (!isValidCell(board, nr, nc)) return null;
   return [nr, nc];
 }
 
@@ -92,7 +95,7 @@ export function getReachableCells(
     let cc = col;
 
     while (true) {
-      const next = hexStep(cr, cc, dir);
+      const next = hexStep(board, cr, cc, dir);
       if (!next) break;
       const [nr, nc] = next;
       if (isOccupied(board[nr][nc])) break;
@@ -108,10 +111,10 @@ export function getReachableCells(
 /**
  * Get hex neighbors of a cell.
  */
-export function getNeighbors(row: number, col: number): [number, number][] {
+export function getNeighbors(board: number[][], row: number, col: number): [number, number][] {
   const result: [number, number][] = [];
   for (let dir = 0; dir < 6; dir++) {
-    const next = hexStep(row, col, dir);
+    const next = hexStep(board, row, col, dir);
     if (next) result.push(next);
   }
   return result;
@@ -147,7 +150,7 @@ export function isVikingNomadic(board: number[][], row: number, col: number): bo
       return true;
     }
 
-    for (const [nr, nc] of getNeighbors(r, c)) {
+    for (const [nr, nc] of getNeighbors(board, r, c)) {
       if (!visited.has(`${nr},${nc}`)) {
         stack.push([nr, nc]);
       }

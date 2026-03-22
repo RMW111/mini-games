@@ -15,6 +15,7 @@ import { ProtectedRoute } from "src/components/layout/ProtectedRoute/ProtectedRo
 import { ContinueGamePage } from "src/pages/ContinueGamePage/ContinueGamePage.tsx";
 import { GameSlug } from "src/types/game.ts";
 import { CreateGoGamePage } from "src/pages/CreateGoGamePage/CreateGoGamePage.tsx";
+import { CreateRagnarocksGamePage } from "src/pages/CreateRagnarocksGamePage/CreateRagnarocksGamePage.tsx";
 
 function App() {
   const [, setUser] = useAtom(userAtom);
@@ -67,6 +68,7 @@ function App() {
 
         <Route path="/create-game">
           <Route path={`/create-game/${GameSlug.Go}`} element={<CreateGoGamePage />} />
+          <Route path={`/create-game/${GameSlug.Ragnarocks}`} element={<CreateRagnarocksGamePage />} />
         </Route>
 
         <Route

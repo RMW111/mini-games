@@ -2,66 +2,42 @@ use crate::games::ragnarocks::models::cell::{
     self, EMPTY, RUNESTONE, is_occupied, viking_color,
 };
 use crate::games::ragnarocks::models::color::PlayerColor;
+use crate::games::ragnarocks::models::creation_data::BoardSize;
 use crate::utils::coords::Coords;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 
-/// Row sizes for the Ragnarocks board (10 rows, 86 total hexes).
-/// Row 0 = 5 cells (White start), Row 9 = 9 cells (Red start).
-pub const ROW_SIZES: [usize; 10] = [5, 6, 7, 8, 9, 10, 11, 11, 10, 9];
+/// Row sizes for the small board (10 rows, 86 total hexes).
+pub const SMALL_ROW_SIZES: &[usize] = &[5, 6, 7, 8, 9, 10, 11, 11, 10, 9];
 
-/// The 6 hex directions for pointy-top hexagons.
-/// Each direction is represented as a function that computes the neighbor
-/// given the current (row, col) position, returning None if out of bounds.
-///
-/// Board layout (pointy-top, each row shifts left relative to previous for rows 1-6,
-/// then row 7 shifts right relative to row 6, and rows 8-9 continue shifting right):
-///
-/// ```text
-///       [0][1][2][3][4]              (Row 0: 5)
-///      [0][1][2][3][4][5]            (Row 1: 6)
-///     [0][1][2][3][4][5][6]          (Row 2: 7)
-///    [0][1][2][3][4][5][6][7]        (Row 3: 8)
-///   [0][1][2][3][4][5][6][7][8]      (Row 4: 9)
-///  [0][1][2][3][4][5][6][7][8][9]    (Row 5: 10)
-/// [0][1][2][3][4][5][6][7][8][9][10] (Row 6: 11)
-///  [0][1][2][3][4][5][6][7][8][9][10](Row 7: 11)
-///   [0][1][2][3][4][5][6][7][8][9]   (Row 8: 10)
-///    [0][1][2][3][4][5][6][7][8]     (Row 9: 9)
-/// ```
-///
-/// To determine neighbors we need to understand the pixel-offset of each row.
-/// Let's define the "left offset" of each row in half-hex units relative to Row 6 (the leftmost):
-///   Row 0: offset 6 (shifted right by 6 half-hexes relative to row 6)
-///   Row 1: offset 5
-///   Row 2: offset 4
-///   Row 3: offset 3
-///   Row 4: offset 2
-///   Row 5: offset 1
-///   Row 6: offset 0
-///   Row 7: offset 1
-///   Row 8: offset 2
-///   Row 9: offset 3
-///
-/// For pointy-top hexagons where each successive row shifts by 0.5 hex,
-/// moving to a neighbor row means the column index relationship depends on the
-/// relative shift between the two rows.
-///
-/// If moving from row r to row r±1:
-///   shift_diff = LEFT_OFFSETS[r±1] - LEFT_OFFSETS[r]
-///   If shift_diff == -1 (next row extends further left):
-///     NE/NW or SE/SW neighbors: col stays same or col-1
-///   If shift_diff == +1 (next row is indented right):
-///     NE/NW or SE/SW neighbors: col stays same or col+1
+/// Row sizes for the large board (14 rows, 164 total hexes).
+pub const LARGE_ROW_SIZES: &[usize] = &[7, 8, 9, 10, 11, 12, 13, 14, 15, 15, 14, 13, 12, 11];
 
-const LEFT_OFFSETS: [i32; 10] = [6, 5, 4, 3, 2, 1, 0, 1, 2, 3];
+pub fn row_sizes_for(board_size: BoardSize) -> &'static [usize] {
+    match board_size {
+        BoardSize::Small => SMALL_ROW_SIZES,
+        BoardSize::Large => LARGE_ROW_SIZES,
+    }
+}
+
+/// Compute the left offset for a given row based on the board structure.
+/// The pivot is the first row with the maximum width; it has offset 0.
+fn compute_left_offset(row_sizes: &[usize], row: usize) -> i32 {
+    let max_len = row_sizes.iter().copied().max().unwrap_or(0);
+    let pivot = row_sizes.iter().position(|&s| s == max_len).unwrap_or(0);
+    if row <= pivot {
+        (pivot - row) as i32
+    } else {
+        (row - pivot) as i32
+    }
+}
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Board(Vec<Vec<u8>>);
 
 impl Board {
-    pub fn new() -> Self {
-        let rows: Vec<Vec<u8>> = ROW_SIZES.iter().map(|&size| vec![EMPTY; size]).collect();
+    pub fn new(row_sizes: &[usize]) -> Self {
+        let rows: Vec<Vec<u8>> = row_sizes.iter().map(|&size| vec![EMPTY; size]).collect();
         Self(rows)
     }
 
@@ -71,6 +47,14 @@ impl Board {
 
     pub fn row_size(&self, row: usize) -> usize {
         self.0[row].len()
+    }
+
+    fn row_sizes(&self) -> Vec<usize> {
+        self.0.iter().map(|r| r.len()).collect()
+    }
+
+    fn left_offset(&self, row: usize) -> i32 {
+        compute_left_offset(&self.row_sizes(), row)
     }
 
     pub fn is_valid(&self, coords: Coords) -> bool {
@@ -109,14 +93,7 @@ impl Board {
                 continue;
             }
             let nr = new_row as usize;
-            let shift_diff = LEFT_OFFSETS[nr] - LEFT_OFFSETS[coords.0];
-
-            // When moving to an adjacent row, each cell in the current row
-            // aligns with two cells in the adjacent row.
-            // If shift_diff == -1 (adjacent row extends further left):
-            //   The two diagonal neighbors are at col and col+1
-            // If shift_diff == +1 (adjacent row is indented right):
-            //   The two diagonal neighbors are at col-1 and col
+            let shift_diff = self.left_offset(nr) - self.left_offset(coords.0);
 
             let (nc1, nc2) = if shift_diff == -1 {
                 (col, col + 1)
@@ -185,7 +162,7 @@ impl Board {
                 if nr < 0 {
                     return None;
                 }
-                let shift_diff = LEFT_OFFSETS[nr as usize] - LEFT_OFFSETS[pos.0];
+                let shift_diff = self.left_offset(nr as usize) - self.left_offset(pos.0);
                 let nc = if shift_diff == -1 { col + 1 } else { col };
                 (nr, nc)
             }
@@ -195,7 +172,7 @@ impl Board {
                 if nr < 0 {
                     return None;
                 }
-                let shift_diff = LEFT_OFFSETS[nr as usize] - LEFT_OFFSETS[pos.0];
+                let shift_diff = self.left_offset(nr as usize) - self.left_offset(pos.0);
                 let nc = if shift_diff == -1 { col } else { col - 1 };
                 (nr, nc)
             }
@@ -205,7 +182,7 @@ impl Board {
                 if nr >= self.row_count() as i32 {
                     return None;
                 }
-                let shift_diff = LEFT_OFFSETS[nr as usize] - LEFT_OFFSETS[pos.0];
+                let shift_diff = self.left_offset(nr as usize) - self.left_offset(pos.0);
                 let nc = if shift_diff == -1 { col + 1 } else { col };
                 (nr, nc)
             }
@@ -215,7 +192,7 @@ impl Board {
                 if nr >= self.row_count() as i32 {
                     return None;
                 }
-                let shift_diff = LEFT_OFFSETS[nr as usize] - LEFT_OFFSETS[pos.0];
+                let shift_diff = self.left_offset(nr as usize) - self.left_offset(pos.0);
                 let nc = if shift_diff == -1 { col } else { col - 1 };
                 (nr, nc)
             }

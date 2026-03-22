@@ -14,7 +14,6 @@ interface GamePanelProps {
   whiteScore: number;
   redScore: number;
   canSkip: boolean;
-  isLoading: boolean;
   selectedViking: [number, number] | null;
   onCancelMove: () => void;
   onSkip: () => void;
@@ -32,7 +31,6 @@ const GamePanel = ({
   whiteScore,
   redScore,
   canSkip,
-  isLoading,
   selectedViking,
   onCancelMove,
   onSkip,
@@ -212,7 +210,7 @@ const GamePanel = ({
       {isGameOver && (
         <>
           <div className={styles.divider} />
-          <Button className={styles.newGameBtn} isLoading={isLoading} onClick={onNewGame}>
+          <Button className={styles.newGameBtn} onClick={onNewGame}>
             Новая игра
           </Button>
         </>
