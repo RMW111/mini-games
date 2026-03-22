@@ -38,8 +38,8 @@ import { API } from "src/api";
 const COLORS = {
   cellEmpty: "#2c2c2c",
   cellEmptyStroke: "#444444",
-  cellReachable: "rgba(100, 108, 255, 0.12)",
-  cellReachableStroke: "#646cff",
+  cellReachable: "#3a3a3a",
+  cellReachableStroke: "#ffffff",
   cellSelected: "#4caf50",
   cellSelectedStroke: "#388e3c",
   whiteViking: "#e0e0e0",
