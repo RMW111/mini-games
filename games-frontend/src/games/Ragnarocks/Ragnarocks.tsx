@@ -1,5 +1,4 @@
 import styles from "./Ragnarocks.module.scss";
-import cn from "classnames";
 import { useCallback, useMemo, useState } from "react";
 import { useAtom } from "jotai/index";
 import { useNavigate, useParams } from "react-router-dom";
@@ -10,14 +9,6 @@ import {
   RagnarocksMsgType,
   TurnPhase,
 } from "src/games/Ragnarocks/Ragnarocks.types.ts";
-import {
-  BOARD_HEIGHT,
-  BOARD_WIDTH,
-  HEX_SIZE,
-  ROW_SIZES,
-  hexPoints,
-  hexToPixel,
-} from "src/games/Ragnarocks/Ragnarocks.constants.ts";
 import {
   createRagnarocksMsg,
   getOppositeColor,
@@ -30,25 +21,9 @@ import { ParticipantRole } from "src/types/participant.ts";
 import { SessionStatus } from "src/types/session.ts";
 import type { GameProps } from "src/types/gameProps.ts";
 import { userAtom } from "src/store/user.ts";
-import { Button } from "src/components/ui/Button/Button.tsx";
 import { API } from "src/api";
-
-// ─── Board color palette (dark theme) ────────────────────
-
-const COLORS = {
-  cellEmpty: "#2c2c2c",
-  cellEmptyStroke: "#444444",
-  cellReachable: "#3a3a3a",
-  cellReachableStroke: "#ffffff",
-  cellSelected: "#3a3a3a",
-  cellSelectedStroke: "#ffffff",
-  whiteViking: "#383838",
-  whiteVikingStroke: "#555555",
-  redViking: "#3a2c2c",
-  redVikingStroke: "#5a3333",
-  runestone: "#555555",
-  runestoneStroke: "#777777",
-};
+import HexBoard from "./components/HexBoard.tsx";
+import GamePanel from "./components/GamePanel.tsx";
 
 const Ragnarocks = ({ socket, session }: GameProps<GameState>) => {
   const [user] = useAtom(userAtom);
@@ -78,7 +53,6 @@ const Ragnarocks = ({ socket, session }: GameProps<GameState>) => {
   const myVikingValue =
     myColor === PlayerColor.White ? CellValue.WhiteViking : CellValue.RedViking;
 
-  // Compute reachable cells for highlights
   const reachableCells = useMemo(() => {
     if (!isMyTurn) return new Set<string>();
 
@@ -99,7 +73,6 @@ const Ragnarocks = ({ socket, session }: GameProps<GameState>) => {
     return new Set<string>();
   }, [isMyTurn, phase, selectedViking, activeViking, board]);
 
-  // Check if player can make any move (for skip button)
   const canSkip = useMemo(() => {
     if (!isMyTurn || phase !== TurnPhase.MoveViking) return false;
 
@@ -169,13 +142,11 @@ const Ragnarocks = ({ socket, session }: GameProps<GameState>) => {
   );
 
   const handleCancelMove = () => {
-    const msg = createRagnarocksMsg(RagnarocksMsgType.CancelMove);
-    sendGameMsg(msg);
+    sendGameMsg(createRagnarocksMsg(RagnarocksMsgType.CancelMove));
   };
 
   const handleSkip = () => {
-    const msg = createRagnarocksMsg(RagnarocksMsgType.Skip);
-    sendGameMsg(msg);
+    sendGameMsg(createRagnarocksMsg(RagnarocksMsgType.Skip));
   };
 
   const handleNewGame = () => {
@@ -188,360 +159,35 @@ const Ragnarocks = ({ socket, session }: GameProps<GameState>) => {
       .finally(() => setIsLoading(false));
   };
 
-  // ─── Board rendering helpers ───────────────────────────
-
-  const getCellFill = (cellValue: number, row: number, col: number) => {
-    const key = `${row},${col}`;
-    const isSelected =
-      selectedViking && selectedViking[0] === row && selectedViking[1] === col;
-
-    if (isSelected) return COLORS.cellSelected;
-
-    switch (cellValue) {
-      case CellValue.WhiteViking:
-        return COLORS.whiteViking;
-      case CellValue.RedViking:
-        return COLORS.redViking;
-      case CellValue.Runestone:
-        return COLORS.runestone;
-      default:
-        return reachableCells.has(key) ? COLORS.cellReachable : COLORS.cellEmpty;
-    }
-  };
-
-  const getCellStroke = (cellValue: number, row: number, col: number) => {
-    const isSelected =
-      selectedViking && selectedViking[0] === row && selectedViking[1] === col;
-    if (isSelected) return COLORS.cellSelectedStroke;
-
-    switch (cellValue) {
-      case CellValue.WhiteViking:
-        return COLORS.whiteVikingStroke;
-      case CellValue.RedViking:
-        return COLORS.redVikingStroke;
-      case CellValue.Runestone:
-        return COLORS.runestoneStroke;
-      default:
-        return reachableCells.has(`${row},${col}`)
-          ? COLORS.cellReachableStroke
-          : COLORS.cellEmptyStroke;
-    }
-  };
-
-  const getCellCursor = (cellValue: number, row: number, col: number) => {
-    if (!isMyTurn || isGameOver) return "default";
-
-    if (phase === TurnPhase.MoveViking) {
-      if (cellValue === myVikingValue && isVikingNomadic(board, row, col)) return "pointer";
-      if (selectedViking && reachableCells.has(`${row},${col}`)) return "pointer";
-    }
-
-    if (phase === TurnPhase.PlaceRunestone) {
-      if (reachableCells.has(`${row},${col}`)) return "pointer";
-    }
-
-    return "default";
-  };
-
-  // ─── SVG icon helpers ────────────────────────────────────
-
-  const renderViking = (cx: number, cy: number, color: "white" | "red") => {
-    const iconColor = color === "white" ? "#ffffff" : "#ff4d4d";
-    const iconSize = HEX_SIZE * 0.9;
-    const scale = iconSize / 24;
-    const tx = cx - iconSize / 2;
-    const ty = cy - iconSize / 2;
-    return (
-      <g
-        transform={`translate(${tx}, ${ty}) scale(${scale})`}
-        style={{ pointerEvents: "none" }}
-      >
-        {/* Lucide Axe icon (stroke-based, 24x24 viewBox) */}
-        <path
-          d="m14 12-8.381 8.38a1 1 0 0 1-3.001-3L11 9"
-          fill="none"
-          stroke={iconColor}
-          strokeWidth={2}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M15 15.5a.5.5 0 0 0 .5.5A6.5 6.5 0 0 0 22 9.5a.5.5 0 0 0-.5-.5h-1.672a2 2 0 0 1-1.414-.586l-5.062-5.062a1.205 1.205 0 0 0-1.704 0L9.352 5.648a1.205 1.205 0 0 0 0 1.704l5.062 5.062A2 2 0 0 1 15 13.828z"
-          fill="none"
-          stroke={iconColor}
-          strokeWidth={2}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </g>
-    );
-  };
-
-  const renderRunestone = (cx: number, cy: number) => {
-    const iconSize = HEX_SIZE * 0.9;
-    const scale = iconSize / 24;
-    const tx = cx - iconSize / 2;
-    const ty = cy - iconSize / 2;
-    return (
-      <g
-        transform={`translate(${tx}, ${ty}) scale(${scale})`}
-        style={{ pointerEvents: "none" }}
-      >
-        {/* Lucide Shield icon (stroke-based, 24x24 viewBox) */}
-        <path
-          d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"
-          fill="none"
-          stroke="#aaaaaa"
-          strokeWidth={2}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </g>
-    );
-  };
-
-  // ─── SVG hex rendering ─────────────────────────────────
-  // Render in two passes: base cells first, then highlighted cells on top
-  // so their strokes are fully visible on all edges.
-
-  const baseCells: React.ReactNode[] = [];
-  const highlightedCells: React.ReactNode[] = [];
-
-  board.forEach((row, rowI) =>
-    row.forEach((cell, colI) => {
-      const { x, y } = hexToPixel(rowI, colI);
-      const key = `${rowI},${colI}`;
-      const isReachable = reachableCells.has(key);
-      const isSelected =
-        selectedViking && selectedViking[0] === rowI && selectedViking[1] === colI;
-
-      const node = (
-        <g key={key} onClick={() => handleCellClick(rowI, colI)}>
-          <polygon
-            points={hexPoints(x, y)}
-            fill={getCellFill(cell, rowI, colI)}
-            stroke={getCellStroke(cell, rowI, colI)}
-            strokeWidth={isReachable || isSelected ? 2 : 1.5}
-            style={{ cursor: getCellCursor(cell, rowI, colI) }}
-          />
-          {(cell === CellValue.WhiteViking || cell === CellValue.RedViking) &&
-            renderViking(x, y, cell === CellValue.WhiteViking ? "white" : "red")}
-          {cell === CellValue.Runestone && renderRunestone(x, y)}
-        </g>
-      );
-
-      if (isReachable || isSelected) {
-        highlightedCells.push(node);
-      } else {
-        baseCells.push(node);
-      }
-    }),
-  );
-
-  // ─── Panel content by state ────────────────────────────
-
-  const iAmWinner = won === myColor;
-
-  const renderBadge = () => {
-    if (isGameOver) {
-      return iAmWinner ? (
-        <div className={cn(styles.badge, styles.badge_success)}>
-          <span>✓</span>
-          <span>ПОБЕДА</span>
-        </div>
-      ) : (
-        <div className={cn(styles.badge, styles.badge_error)}>
-          <span>✗</span>
-          <span>ПОРАЖЕНИЕ</span>
-        </div>
-      );
-    }
-
-    if (isWaiting) {
-      return (
-        <div className={cn(styles.badge, styles.badge_primary)}>
-          <span>◐</span>
-          <span>ОЖИДАНИЕ</span>
-        </div>
-      );
-    }
-
-    if (isOpponentTurn) {
-      return (
-        <div className={cn(styles.badge, styles.badge_primary)}>
-          <span>◐</span>
-          <span>ХОД СОПЕРНИКА</span>
-        </div>
-      );
-    }
-
-    return (
-      <div className={cn(styles.badge, styles.badge_success)}>
-        <span>●</span>
-        <span>ВАШ ХОД</span>
-      </div>
-    );
-  };
-
-  const renderTitle = () => {
-    if (isGameOver) {
-      return (
-        <div className={iAmWinner ? styles.title_victory : styles.title_defeat}>
-          {iAmWinner ? "Вы победили!" : "Вы проиграли"}
-        </div>
-      );
-    }
-
-    if (isWaiting) return <div className={styles.title}>Ожидание соперника...</div>;
-    if (isOpponentTurn) return <div className={styles.title}>Ход соперника</div>;
-
-    if (phase === TurnPhase.MoveViking) {
-      return <div className={styles.title}>Выберите викинга и передвиньте его</div>;
-    }
-
-    return <div className={styles.title}>Поставьте рунный камень</div>;
-  };
-
-  const renderSubtitle = () => {
-    if (isGameOver) return null;
-
-    if (isWaiting) return null;
-
-    if (isOpponentTurn) {
-      return <div className={styles.subtitle}>Ожидайте, соперник думает...</div>;
-    }
-
-    if (phase === TurnPhase.MoveViking) {
-      return (
-        <div className={styles.subtitle}>
-          {selectedViking
-            ? "Нажмите на подсвеченную клетку для хода"
-            : "Нажмите на своего кочующего викинга"}
-        </div>
-      );
-    }
-
-    if (phase === TurnPhase.PlaceRunestone) {
-      return <div className={styles.subtitle}>Нажмите на подсвеченную клетку</div>;
-    }
-
-    return null;
-  };
-
-  const renderScores = () => {
-    const myWhite = myColor === PlayerColor.White;
-
-    return (
-      <div className={styles.scores}>
-        <div className={styles.scoreRow}>
-          <span className={styles.scoreLabel}>
-            <span className={cn(styles.colorDot, styles.colorDot_white)} />
-            <span className={styles.scoreName}>Белые</span>
-          </span>
-          <span
-            className={cn(styles.scoreValue, {
-              [styles.scoreValue_highlight]: isGameOver && (myWhite ? iAmWinner : !iAmWinner),
-            })}
-          >
-            {whiteScore}
-          </span>
-        </div>
-        <div className={styles.scoreRow}>
-          <span className={styles.scoreLabel}>
-            <span className={cn(styles.colorDot, styles.colorDot_red)} />
-            <span className={styles.scoreName}>Красные</span>
-          </span>
-          <span
-            className={cn(styles.scoreValue, {
-              [styles.scoreValue_highlight]: isGameOver && (!myWhite ? iAmWinner : !iAmWinner),
-            })}
-          >
-            {redScore}
-          </span>
-        </div>
-      </div>
-    );
-  };
-
-  const renderBigScore = () => {
-    if (!isGameOver) return null;
-
-    const myScore = myColor === PlayerColor.White ? whiteScore : redScore;
-    const opponentScore = myColor === PlayerColor.White ? redScore : whiteScore;
-
-    return (
-      <div className={styles.bigScore}>
-        <span className={cn(styles.bigScoreNumber, styles.bigScoreNumber_winner)}>
-          {myScore}
-        </span>
-        <span className={styles.bigScoreSeparator}>:</span>
-        <span className={cn(styles.bigScoreNumber, styles.bigScoreNumber_loser)}>
-          {opponentScore}
-        </span>
-      </div>
-    );
-  };
-
   return (
     <div className={styles.container}>
-      <div className={styles.boardContainer}>
-        <svg
-          width={BOARD_WIDTH}
-          height={BOARD_HEIGHT}
-          viewBox={`0 0 ${BOARD_WIDTH} ${BOARD_HEIGHT}`}
-        >
-          {baseCells}
-          {highlightedCells}
-        </svg>
-      </div>
-
-      <div className={styles.panel}>
-        {renderBadge()}
-        {renderTitle()}
-
-        {isWaiting && (
-          <div className={styles.loadingDots}>
-            <span className={styles.loadingDot} />
-            <span className={styles.loadingDot} />
-            <span className={styles.loadingDot} />
-          </div>
-        )}
-
-        {renderSubtitle()}
-
-        <div className={styles.divider} />
-
-        {renderBigScore()}
-
-        {renderScores()}
-
-        {isMyTurn && phase === TurnPhase.PlaceRunestone && (
-          <>
-            <div className={styles.divider} />
-            <button className={styles.cancelBtn} onClick={handleCancelMove}>
-              Отменить ход
-            </button>
-          </>
-        )}
-
-        {canSkip && isMyTurn && (
-          <>
-            <div className={styles.divider} />
-            <Button className={styles.newGameBtn} onClick={handleSkip}>
-              Пропустить ход
-            </Button>
-          </>
-        )}
-
-        {isGameOver && (
-          <>
-            <div className={styles.divider} />
-            <Button className={styles.newGameBtn} isLoading={isLoading} onClick={handleNewGame}>
-              Новая игра
-            </Button>
-          </>
-        )}
-      </div>
+      <HexBoard
+        board={board}
+        selectedViking={selectedViking}
+        reachableCells={reachableCells}
+        isMyTurn={isMyTurn}
+        isGameOver={isGameOver}
+        phase={phase}
+        myVikingValue={myVikingValue}
+        onCellClick={handleCellClick}
+      />
+      <GamePanel
+        isGameOver={isGameOver}
+        isMyTurn={isMyTurn}
+        isWaiting={isWaiting}
+        isOpponentTurn={isOpponentTurn}
+        iAmWinner={won === myColor}
+        phase={phase}
+        myColor={myColor}
+        whiteScore={whiteScore}
+        redScore={redScore}
+        canSkip={canSkip}
+        isLoading={isLoading}
+        selectedViking={selectedViking}
+        onCancelMove={handleCancelMove}
+        onSkip={handleSkip}
+        onNewGame={handleNewGame}
+      />
     </div>
   );
 };
