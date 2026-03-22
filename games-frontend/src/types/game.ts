@@ -10,4 +10,6 @@ export interface GameInfo {
   slug: GameSlug;
   name: string;
   description: string;
+  maxPlayers: number | null;
+  imageUrl: string | null;
 }

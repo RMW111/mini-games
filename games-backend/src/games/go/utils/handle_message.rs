@@ -12,22 +12,16 @@ use crate::models::user::User;
 use crate::utils::coords::Coords;
 use sqlx::PgPool;
 
-struct GoHandlerData {
-    user_color: StoneColor,
-    pool: PgPool,
-}
-
 struct GoHandler<'a> {
     live_session: &'a mut LiveSession,
     pool: PgPool,
-    user: User,
     user_color: StoneColor,
     game_state: GoState,
 }
 
 impl<'a> GoHandler<'a> {
     pub fn new(live_session: &'a mut LiveSession, user: User, pool: PgPool) -> Self {
-        let mut game_state: GoState =
+        let game_state: GoState =
             serde_json::from_value(live_session.session_state.game_state.clone()).unwrap();
 
         let creator = live_session
@@ -46,7 +40,6 @@ impl<'a> GoHandler<'a> {
 
         Self {
             live_session,
-            user,
             pool,
             user_color,
             game_state,

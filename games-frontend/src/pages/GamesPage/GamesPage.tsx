@@ -4,6 +4,40 @@ import { API } from "src/api";
 import styles from "./GamesPage.module.scss";
 
 import type { GameInfo } from "src/types/game.ts";
+import playIcon from "src/assets/icons/play.png";
+
+const UsersIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+    <circle cx="9" cy="7" r="4" />
+    <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+  </svg>
+);
+
+const SkeletonCard = () => (
+  <div className={styles.gameCard}>
+    <div className={`${styles.cardImage} ${styles.skeleton}`} />
+    <div className={styles.cardBody}>
+      <div className={styles.cardText}>
+        <div className={`${styles.skeletonLine} ${styles.skeletonTitle}`} />
+        <div className={`${styles.skeletonLine} ${styles.skeletonDesc}`} />
+        <div className={`${styles.skeletonLine} ${styles.skeletonDescShort}`} />
+      </div>
+      <div className={styles.cardMeta}>
+        <div className={`${styles.skeletonLine} ${styles.skeletonMeta}`} />
+        <div className={`${styles.skeletonLine} ${styles.skeletonBtn}`} />
+      </div>
+    </div>
+  </div>
+);
+
+const formatPlayers = (maxPlayers: number | null) => {
+  if (maxPlayers === null) return "∞ игроков";
+  if (maxPlayers === 1) return "1 игрок";
+  if (maxPlayers >= 2 && maxPlayers <= 4) return `${maxPlayers} игрока`;
+  return `${maxPlayers} игроков`;
+};
 
 export const GamesPage = () => {
   const [games, setGames] = useState<GameInfo[]>();
@@ -18,7 +52,13 @@ export const GamesPage = () => {
 
   const renderContent = () => {
     if (!games) {
-      return <div className={styles.loading}>Загрузка игр...</div>;
+      return (
+        <div className={styles.gamesList}>
+          {Array.from({ length: 4 }, (_, i) => (
+            <SkeletonCard key={i} />
+          ))}
+        </div>
+      );
     }
 
     if (error) {
@@ -33,8 +73,29 @@ export const GamesPage = () => {
       <div className={styles.gamesList}>
         {games.map((game) => (
           <Link to={`/games/${game.slug}`} key={game.id} className={styles.gameCard}>
-            <h3 className={styles.gameName}>{game.name}</h3>
-            <p className={styles.gameDescription}>{game.description}</p>
+            <div className={styles.cardImage}>
+              {game.imageUrl ? (
+                <img src={game.imageUrl} alt={game.name} />
+              ) : (
+                <div className={styles.cardImagePlaceholder} />
+              )}
+            </div>
+            <div className={styles.cardBody}>
+              <div className={styles.cardText}>
+                <h3 className={styles.cardTitle}>{game.name}</h3>
+                <p className={styles.cardDesc}>{game.description}</p>
+              </div>
+              <div className={styles.cardMeta}>
+                <span className={styles.metaPlayers}>
+                  <UsersIcon />
+                  {formatPlayers(game.maxPlayers)}
+                </span>
+                <span className={styles.playBtn}>
+                  <img src={playIcon} alt="" className={styles.playIcon} />
+                  Играть
+                </span>
+              </div>
+            </div>
           </Link>
         ))}
       </div>
@@ -43,8 +104,15 @@ export const GamesPage = () => {
 
   return (
     <div className={styles.container}>
-      <h2 className={styles.title}>Доступные игры</h2>
+      <div className={styles.header}>
+        <h2 className={styles.title}>Доступные игры</h2>
+        <p className={styles.subtitle}>Выберите игру и начните играть с друзьями прямо сейчас</p>
+      </div>
       {renderContent()}
+      <div className={styles.bottomSection}>
+        <div className={styles.divider} />
+        <span className={styles.comingSoon}>✨ Новые игры скоро появятся</span>
+      </div>
     </div>
   );
 };

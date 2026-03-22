@@ -233,7 +233,6 @@ async fn handle_game_message(
     live_session: &mut LiveSession,
     handler_data: HandlerData,
 ) {
-    println!("message 111: {:?}", message);
     match message {
         GameClientMessage::Minesweeper(message) => {
             handle_minesweeper_message(message, live_session, handler_data).await

@@ -5,6 +5,7 @@ import { API } from "src/api";
 import { useAtom } from "jotai";
 import { userAtom } from "src/store/user.ts";
 import { authAtom } from "src/store/auth.ts";
+import gamepadIcon from "src/assets/icons/gamepad.png";
 
 export const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -37,7 +38,8 @@ export const Header = () => {
   return (
     <header className={styles.header}>
       <Link to="/games" className={styles.logo}>
-        🎮 MiniGames
+        <img src={gamepadIcon} alt="" className={styles.logoIcon} />
+        MiniGames
       </Link>
 
       {user && (
