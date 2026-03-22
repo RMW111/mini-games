@@ -278,18 +278,24 @@ const Ragnarocks = ({ socket, session }: GameProps<GameState>) => {
   };
 
   const renderRunestone = (cx: number, cy: number) => {
-    const s = HEX_SIZE * 0.3;
+    const iconSize = HEX_SIZE * 0.9;
+    const scale = iconSize / 24;
+    const tx = cx - iconSize / 2;
+    const ty = cy - iconSize / 2;
     return (
-      <g style={{ pointerEvents: "none" }}>
-        <polygon
-          points={`${cx},${cy - s * 1.2} ${cx + s * 0.9},${cy} ${cx},${cy + s * 1.2} ${cx - s * 0.9},${cy}`}
-          fill="#888888"
+      <g
+        transform={`translate(${tx}, ${ty}) scale(${scale})`}
+        style={{ pointerEvents: "none" }}
+      >
+        {/* Lucide Shield icon (stroke-based, 24x24 viewBox) */}
+        <path
+          d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"
+          fill="none"
           stroke="#aaaaaa"
-          strokeWidth={1.2}
+          strokeWidth={2}
+          strokeLinecap="round"
+          strokeLinejoin="round"
         />
-        {/* Rune mark */}
-        <line x1={cx} y1={cy - s * 0.6} x2={cx} y2={cy + s * 0.6} stroke="#cccccc" strokeWidth={1.2} />
-        <line x1={cx - s * 0.35} y1={cy - s * 0.2} x2={cx + s * 0.35} y2={cy + s * 0.2} stroke="#cccccc" strokeWidth={1} />
       </g>
     );
   };
