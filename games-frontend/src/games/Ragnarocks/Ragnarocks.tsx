@@ -246,23 +246,33 @@ const Ragnarocks = ({ socket, session }: GameProps<GameState>) => {
   // ─── SVG icon helpers ────────────────────────────────────
 
   const renderViking = (cx: number, cy: number, color: "white" | "red") => {
-    const fill = color === "white" ? "#ffffff" : "#ff4d4d";
-    const stroke = color === "white" ? "#aaaaaa" : "#cc3333";
-    const r = HEX_SIZE * 0.32;
+    const iconColor = color === "white" ? "#ffffff" : "#ff4d4d";
+    const iconSize = HEX_SIZE * 0.9;
+    const scale = iconSize / 24;
+    const tx = cx - iconSize / 2;
+    const ty = cy - iconSize / 2;
     return (
-      <g style={{ pointerEvents: "none" }}>
-        {/* Shield body */}
+      <g
+        transform={`translate(${tx}, ${ty}) scale(${scale})`}
+        style={{ pointerEvents: "none" }}
+      >
+        {/* Lucide Axe icon (stroke-based, 24x24 viewBox) */}
         <path
-          d={`M ${cx} ${cy - r * 1.1}
-              C ${cx + r * 1.2} ${cy - r * 1.1}, ${cx + r * 1.2} ${cy + r * 0.3}, ${cx} ${cy + r * 1.3}
-              C ${cx - r * 1.2} ${cy + r * 0.3}, ${cx - r * 1.2} ${cy - r * 1.1}, ${cx} ${cy - r * 1.1} Z`}
-          fill={fill}
-          stroke={stroke}
-          strokeWidth={1.2}
+          d="m14 12-8.381 8.38a1 1 0 0 1-3.001-3L11 9"
+          fill="none"
+          stroke={iconColor}
+          strokeWidth={2}
+          strokeLinecap="round"
+          strokeLinejoin="round"
         />
-        {/* Shield cross */}
-        <line x1={cx} y1={cy - r * 0.8} x2={cx} y2={cy + r * 1.0} stroke={stroke} strokeWidth={1} />
-        <line x1={cx - r * 0.8} y1={cy - r * 0.1} x2={cx + r * 0.8} y2={cy - r * 0.1} stroke={stroke} strokeWidth={1} />
+        <path
+          d="M15 15.5a.5.5 0 0 0 .5.5A6.5 6.5 0 0 0 22 9.5a.5.5 0 0 0-.5-.5h-1.672a2 2 0 0 1-1.414-.586l-5.062-5.062a1.205 1.205 0 0 0-1.704 0L9.352 5.648a1.205 1.205 0 0 0 0 1.704l5.062 5.062A2 2 0 0 1 15 13.828z"
+          fill="none"
+          stroke={iconColor}
+          strokeWidth={2}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
       </g>
     );
   };
