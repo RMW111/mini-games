@@ -4,6 +4,7 @@ import { API } from "src/api";
 import styles from "./GamesPage.module.scss";
 
 import type { GameInfo } from "src/types/game.ts";
+import playIcon from "src/components/icons/play.png";
 
 const UsersIcon = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -67,7 +68,8 @@ export const GamesPage = () => {
                   {formatPlayers(game.max_players)}
                 </span>
                 <span className={styles.playBtn}>
-                  ▶ Играть
+                  <img src={playIcon} alt="" className={styles.playIcon} />
+                  Играть
                 </span>
               </div>
             </div>
