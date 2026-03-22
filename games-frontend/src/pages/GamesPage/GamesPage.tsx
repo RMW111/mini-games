@@ -15,6 +15,23 @@ const UsersIcon = () => (
   </svg>
 );
 
+const SkeletonCard = () => (
+  <div className={styles.gameCard}>
+    <div className={`${styles.cardImage} ${styles.skeleton}`} />
+    <div className={styles.cardBody}>
+      <div className={styles.cardText}>
+        <div className={`${styles.skeletonLine} ${styles.skeletonTitle}`} />
+        <div className={`${styles.skeletonLine} ${styles.skeletonDesc}`} />
+        <div className={`${styles.skeletonLine} ${styles.skeletonDescShort}`} />
+      </div>
+      <div className={styles.cardMeta}>
+        <div className={`${styles.skeletonLine} ${styles.skeletonMeta}`} />
+        <div className={`${styles.skeletonLine} ${styles.skeletonBtn}`} />
+      </div>
+    </div>
+  </div>
+);
+
 const formatPlayers = (maxPlayers: number | null) => {
   if (maxPlayers === null) return "∞ игроков";
   if (maxPlayers === 1) return "1 игрок";
@@ -35,7 +52,13 @@ export const GamesPage = () => {
 
   const renderContent = () => {
     if (!games) {
-      return <div className={styles.loading}>Загрузка игр...</div>;
+      return (
+        <div className={styles.gamesList}>
+          {Array.from({ length: 4 }, (_, i) => (
+            <SkeletonCard key={i} />
+          ))}
+        </div>
+      );
     }
 
     if (error) {
