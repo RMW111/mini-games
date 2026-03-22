@@ -5,7 +5,7 @@ import { API } from "src/api";
 import { useAtom } from "jotai";
 import { userAtom } from "src/store/user.ts";
 import { authAtom } from "src/store/auth.ts";
-import gamepadIcon from "src/components/icons/gamepad.png";
+import gamepadIcon from "src/assets/icons/gamepad.png";
 
 export const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);

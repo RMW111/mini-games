@@ -4,7 +4,7 @@ import { API } from "src/api";
 import styles from "./GamesPage.module.scss";
 
 import type { GameInfo } from "src/types/game.ts";
-import playIcon from "src/components/icons/play.png";
+import playIcon from "src/assets/icons/play.png";
 
 const UsersIcon = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
