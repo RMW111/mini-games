@@ -74,8 +74,8 @@ export const GamesPage = () => {
         {games.map((game) => (
           <Link to={`/games/${game.slug}`} key={game.id} className={styles.gameCard}>
             <div className={styles.cardImage}>
-              {game.image_url ? (
-                <img src={game.image_url} alt={game.name} />
+              {game.imageUrl ? (
+                <img src={game.imageUrl} alt={game.name} />
               ) : (
                 <div className={styles.cardImagePlaceholder} />
               )}
@@ -88,7 +88,7 @@ export const GamesPage = () => {
               <div className={styles.cardMeta}>
                 <span className={styles.metaPlayers}>
                   <UsersIcon />
-                  {formatPlayers(game.max_players)}
+                  {formatPlayers(game.maxPlayers)}
                 </span>
                 <span className={styles.playBtn}>
                   <img src={playIcon} alt="" className={styles.playIcon} />
