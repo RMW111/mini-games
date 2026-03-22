@@ -1,0 +1,16 @@
+EMPTY = 0
+WHITE_VIKING = 1
+RED_VIKING = 2
+RUNESTONE = 3
+
+WHITE = 1
+RED = 2
+
+SMALL_ROW_SIZES = (5, 6, 7, 8, 9, 10, 11, 11, 10, 9)
+LARGE_ROW_SIZES = (7, 8, 9, 10, 11, 12, 13, 14, 15, 15, 14, 13, 12, 11)
+
+SMALL_WHITE_VIKINGS = [(0, 1), (0, 2), (0, 3)]
+SMALL_RED_VIKINGS = [(9, 3), (9, 4), (9, 5)]
+
+LARGE_WHITE_VIKINGS = [(0, 1), (0, 2), (0, 3), (0, 4), (0, 5)]
+LARGE_RED_VIKINGS = [(13, 3), (13, 4), (13, 5), (13, 6), (13, 7)]
