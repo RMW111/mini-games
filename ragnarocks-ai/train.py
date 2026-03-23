@@ -78,9 +78,8 @@ def main():
         elapsed = time.time() - start_time
         trainer.run_iteration(i, total_iterations=end_iter, elapsed_so_far=elapsed)
 
-        if i % 5 == 0:
-            path = os.path.join(args.save_dir, f"model_iter_{i}.pt")
-            trainer.save(path)
+        path = os.path.join(args.save_dir, f"model_iter_{i}.pt")
+        trainer.save(path)
 
     # Save final model
     total_time = time.time() - start_time
