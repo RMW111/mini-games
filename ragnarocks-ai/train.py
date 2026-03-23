@@ -10,6 +10,7 @@ Usage:
 import argparse
 import os
 import time
+import torch
 from ragnarocks.trainer import Trainer
 
 
@@ -35,11 +36,15 @@ def main():
 
     os.makedirs(args.save_dir, exist_ok=True)
 
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    print(f"  Device:         {device}")
+
     trainer = Trainer(
         board_size=args.board_size,
         num_simulations=args.simulations,
         num_self_play_games=args.games_per_iter,
         lr=args.lr,
+        device=device,
     )
 
     start_iter = 1
