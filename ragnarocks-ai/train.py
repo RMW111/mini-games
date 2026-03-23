@@ -9,6 +9,7 @@ Usage:
 
 import argparse
 import os
+import time
 from ragnarocks.trainer import Trainer
 
 
@@ -28,6 +29,8 @@ def main():
                         help="Directory for model checkpoints (default: checkpoints)")
     parser.add_argument("--resume", type=str, default=None,
                         help="Path to checkpoint to resume from")
+    parser.add_argument("--start-iter", type=int, default=None,
+                        help="Starting iteration number when resuming (auto-detected from filename if omitted)")
     args = parser.parse_args()
 
     os.makedirs(args.save_dir, exist_ok=True)
@@ -39,27 +42,53 @@ def main():
         lr=args.lr,
     )
 
+    start_iter = 1
     if args.resume:
         trainer.load(args.resume)
+        if args.start_iter is not None:
+            start_iter = args.start_iter
+        else:
+            # Try to auto-detect from filename like "model_iter_35.pt"
+            import re
+            m = re.search(r'model_iter_(\d+)', args.resume)
+            if m:
+                start_iter = int(m.group(1)) + 1
 
+    end_iter = args.iterations
+    if start_iter > end_iter:
+        print(f"Already at iteration {start_iter - 1}, nothing to do.")
+        return
+
+    remaining = end_iter - start_iter + 1
     print(f"Training Ragnarocks AI")
     print(f"  Board size:     {args.board_size}")
-    print(f"  Iterations:     {args.iterations}")
+    print(f"  Iterations:     {start_iter} to {end_iter} ({remaining} remaining)")
     print(f"  Games/iter:     {args.games_per_iter}")
     print(f"  MCTS sims:      {args.simulations}")
     print(f"  Learning rate:  {args.lr}")
 
-    for i in range(1, args.iterations + 1):
-        trainer.run_iteration(i)
+    start_time = time.time()
+
+    for i in range(start_iter, end_iter + 1):
+        elapsed = time.time() - start_time
+        trainer.run_iteration(i, total_iterations=end_iter, elapsed_so_far=elapsed)
 
         if i % 5 == 0:
             path = os.path.join(args.save_dir, f"model_iter_{i}.pt")
             trainer.save(path)
 
     # Save final model
+    total_time = time.time() - start_time
+    mins, secs = divmod(int(total_time), 60)
+    hours, mins = divmod(mins, 60)
+
     final_path = os.path.join(args.save_dir, "model_final.pt")
     trainer.save(final_path)
-    print("\nTraining complete!")
+
+    if hours:
+        print(f"\nTraining complete! Total time: {hours}h {mins}m {secs}s")
+    else:
+        print(f"\nTraining complete! Total time: {mins}m {secs}s")
 
 
 if __name__ == "__main__":

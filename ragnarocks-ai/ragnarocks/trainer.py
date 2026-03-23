@@ -157,10 +157,26 @@ class Trainer:
             "value": total_value_loss / n,
         }
 
-    def run_iteration(self, iteration: int) -> dict:
+    def run_iteration(self, iteration: int, total_iterations: int = 0,
+                      elapsed_so_far: float = 0.0) -> dict:
         """Run one training iteration: self-play → train."""
+        import time
+        iter_start = time.time()
+
+        progress = f"[{iteration}/{total_iterations}]" if total_iterations else f"[{iteration}]"
+        eta = ""
+        if iteration > 1 and total_iterations > 0 and elapsed_so_far > 0:
+            avg_per_iter = elapsed_so_far / (iteration - 1)
+            remaining = avg_per_iter * (total_iterations - iteration + 1)
+            mins, secs = divmod(int(remaining), 60)
+            hours, mins = divmod(mins, 60)
+            if hours:
+                eta = f" | ETA: {hours}h {mins}m"
+            else:
+                eta = f" | ETA: {mins}m {secs}s"
+
         print(f"\n{'='*50}")
-        print(f"Iteration {iteration}")
+        print(f"Iteration {progress}{eta}")
         print(f"{'='*50}")
 
         # Self-play
@@ -177,9 +193,13 @@ class Trainer:
 
         # Train
         losses = self.train_on_examples(all_examples)
+
+        iter_time = time.time() - iter_start
+        mins, secs = divmod(int(iter_time), 60)
         print(f"  Loss — total: {losses['total']:.4f}, "
               f"policy: {losses['policy']:.4f}, "
               f"value: {losses['value']:.4f}")
+        print(f"  Iteration time: {mins}m {secs}s")
 
         return losses
 
