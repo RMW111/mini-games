@@ -26,6 +26,10 @@ def main():
                         help="Board size (default: small)")
     parser.add_argument("--lr", type=float, default=1e-3,
                         help="Learning rate (default: 0.001)")
+    parser.add_argument("--res-blocks", type=int, default=5,
+                        help="Number of residual blocks (default: 5)")
+    parser.add_argument("--channels", type=int, default=64,
+                        help="Hidden channels in ResNet (default: 64)")
     parser.add_argument("--save-dir", default="checkpoints",
                         help="Directory for model checkpoints (default: checkpoints)")
     parser.add_argument("--resume", type=str, default=None,
@@ -45,6 +49,8 @@ def main():
         num_self_play_games=args.games_per_iter,
         lr=args.lr,
         device=device,
+        num_res_blocks=args.res_blocks,
+        hidden_channels=args.channels,
     )
 
     start_iter = 1
@@ -70,6 +76,7 @@ def main():
     print(f"  Iterations:     {start_iter} to {end_iter} ({remaining} remaining)")
     print(f"  Games/iter:     {args.games_per_iter}")
     print(f"  MCTS sims:      {args.simulations}")
+    print(f"  Network:        {args.res_blocks} blocks, {args.channels} channels")
     print(f"  Learning rate:  {args.lr}")
 
     start_time = time.time()

@@ -36,6 +36,8 @@ class Trainer:
         batch_size: int = 32,
         lr: float = 1e-3,
         device: str = "cpu",
+        num_res_blocks: int = 5,
+        hidden_channels: int = 64,
     ):
         self.board_size = board_size
         self.num_simulations = num_simulations
@@ -53,6 +55,8 @@ class Trainer:
             num_rows=self.encoder.num_rows,
             max_cols=self.encoder.max_cols,
             total_actions=self.encoder.total_actions,
+            num_res_blocks=num_res_blocks,
+            hidden_channels=hidden_channels,
         ).to(device)
 
         self.optimizer = torch.optim.Adam(self.network.parameters(), lr=lr, weight_decay=1e-4)

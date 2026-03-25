@@ -64,13 +64,21 @@ def main():
 
     # Load model
     encoder = BoardEncoder(SMALL_ROW_SIZES)
+    checkpoint = torch.load(args.checkpoint, map_location="cpu", weights_only=True)
+
+    # Auto-detect network size from checkpoint
+    state_dict = checkpoint["network"]
+    hidden_channels = state_dict["conv_in.weight"].shape[0]
+    num_res_blocks = sum(1 for k in state_dict if k.startswith("res_blocks.") and k.endswith(".conv1.weight"))
+
     network = RagnarocksNet(
         num_rows=encoder.num_rows,
         max_cols=encoder.max_cols,
         total_actions=encoder.total_actions,
+        num_res_blocks=num_res_blocks,
+        hidden_channels=hidden_channels,
     )
-    checkpoint = torch.load(args.checkpoint, map_location="cpu", weights_only=True)
-    network.load_state_dict(checkpoint["network"])
+    network.load_state_dict(state_dict)
     network.eval()
 
     trained = TrainedAgent(network, encoder, num_simulations=args.simulations)
