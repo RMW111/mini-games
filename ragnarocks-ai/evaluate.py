@@ -8,12 +8,15 @@ Usage:
 
 import argparse
 import time
-from ragnarocks.game import GameState
+try:
+    from ragnarocks_engine import GameState, WHITE, RED, SMALL_ROW_SIZES
+except ImportError:
+    from ragnarocks.game import GameState
+    from ragnarocks.constants import WHITE, RED, SMALL_ROW_SIZES
 from ragnarocks.encoding import BoardEncoder
 from ragnarocks.network import RagnarocksNet
 from ragnarocks.mcts import MCTS
 from ragnarocks.agents.random_agent import RandomAgent
-from ragnarocks.constants import WHITE, RED, SMALL_ROW_SIZES
 import torch
 
 

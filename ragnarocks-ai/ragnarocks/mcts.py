@@ -5,7 +5,10 @@ from __future__ import annotations
 import math
 import numpy as np
 import torch
-from ragnarocks.game import GameState
+try:
+    from ragnarocks_engine import GameState
+except ImportError:
+    from ragnarocks.game import GameState
 from ragnarocks.encoding import BoardEncoder
 from ragnarocks.network import RagnarocksNet
 

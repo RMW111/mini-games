@@ -1,5 +1,9 @@
 import random
-from ragnarocks.game import GameState
+
+try:
+    from ragnarocks_engine import GameState
+except ImportError:
+    from ragnarocks.game import GameState
 
 
 class RandomAgent:

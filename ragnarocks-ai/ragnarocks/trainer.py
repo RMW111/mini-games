@@ -7,11 +7,14 @@ import torch
 import torch.nn.functional as F
 from torch.utils.data import DataLoader, TensorDataset
 
-from ragnarocks.game import GameState
+try:
+    from ragnarocks_engine import GameState, WHITE, SMALL_ROW_SIZES, LARGE_ROW_SIZES
+except ImportError:
+    from ragnarocks.game import GameState
+    from ragnarocks.constants import WHITE, SMALL_ROW_SIZES, LARGE_ROW_SIZES
 from ragnarocks.encoding import BoardEncoder
 from ragnarocks.network import RagnarocksNet
 from ragnarocks.mcts import MCTS
-from ragnarocks.constants import WHITE, SMALL_ROW_SIZES, LARGE_ROW_SIZES
 
 
 class TrainingExample:

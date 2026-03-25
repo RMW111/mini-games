@@ -20,8 +20,13 @@ Action encoding (flat integer index):
 from __future__ import annotations
 
 import numpy as np
-from ragnarocks.game import GameState, PHASE_MOVE, SKIP
-from ragnarocks.constants import WHITE_VIKING, RED_VIKING, RUNESTONE, EMPTY, WHITE
+try:
+    from ragnarocks_engine import GameState, PHASE_MOVE, SKIP, WHITE_VIKING, RED_VIKING, RUNESTONE, EMPTY, WHITE
+    _USE_RUST = True
+except ImportError:
+    from ragnarocks.game import GameState, PHASE_MOVE, SKIP
+    from ragnarocks.constants import WHITE_VIKING, RED_VIKING, RUNESTONE, EMPTY, WHITE
+    _USE_RUST = False
 
 
 class BoardEncoder:
@@ -56,17 +61,25 @@ class BoardEncoder:
     def flat_to_cell(self, flat: int) -> tuple[int, int]:
         return flat // self.max_cols, flat % self.max_cols
 
-    def encode_state(self, state: GameState) -> np.ndarray:
+    def encode_state(self, state) -> np.ndarray:
         """Encode game state as a (6, num_rows, max_cols) float32 tensor."""
         board = state.board
-        current = state.current_turn
+        current = state.current_player()
         is_white = current == WHITE
 
         tensor = np.zeros((6, self.num_rows, self.max_cols), dtype=np.float32)
 
-        for r in range(board.row_count):
-            for c in range(board.row_size(r)):
-                cell = board.get(r, c)
+        # board is list[list[int]] from Rust, or Board object from Python
+        if isinstance(board, list):
+            rows = board
+        else:
+            rows = [[board.get(r, c) for c in range(board.row_size(r))]
+                    for r in range(board.row_count)]
+
+        for r in range(len(rows)):
+            row = rows[r]
+            for c in range(len(row)):
+                cell = row[c]
                 if cell == WHITE_VIKING:
                     ch = 0 if is_white else 1
                     tensor[ch, r, c] = 1.0
