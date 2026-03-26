@@ -1,5 +1,5 @@
 import styles from "./Ragnarocks.module.scss";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useAtom } from "jotai/index";
 import { useNavigate, useParams } from "react-router-dom";
 import {
@@ -24,14 +24,18 @@ import { userAtom } from "src/store/user.ts";
 import HexBoard from "./components/HexBoard.tsx";
 import GamePanel from "./components/GamePanel.tsx";
 
+const AI_SERVER_URL = "http://localhost:8001";
+
 const Ragnarocks = ({ socket, session }: GameProps<GameState>) => {
   const [user] = useAtom(userAtom);
   const navigate = useNavigate();
   const { slug } = useParams<{ slug: string }>();
   const { sendGameMsg } = useSessionWS(socket.current, GameSlug.Ragnarocks);
   const [selectedViking, setSelectedViking] = useState<[number, number] | null>(null);
+  const [aiThinking, setAiThinking] = useState(false);
+  const aiRequestInFlight = useRef(false);
 
-  const { board, currentTurn, phase, activeViking, won, whiteScore, redScore } =
+  const { board, currentTurn, phase, activeViking, won, whiteScore, redScore, vsAi } =
     session.gameState;
   const isGameOver = session.status === SessionStatus.Completed;
 
@@ -44,9 +48,54 @@ const Ragnarocks = ({ socket, session }: GameProps<GameState>) => {
     ? session.gameState.creatorColor
     : getOppositeColor(session.gameState.creatorColor);
 
+  const isAiTurn = vsAi && currentTurn !== myColor && !isGameOver;
   const isMyTurn = currentTurn === myColor && !isGameOver;
-  const isWaiting = session.participants.length < 2;
-  const isOpponentTurn = !isMyTurn && !isGameOver && !isWaiting;
+  const isWaiting = !vsAi && session.participants.length < 2;
+  const isOpponentTurn = !isMyTurn && !isGameOver && !isWaiting && !isAiTurn;
+
+  // AI move logic
+  useEffect(() => {
+    if (!isAiTurn || aiRequestInFlight.current) return;
+
+    aiRequestInFlight.current = true;
+    setAiThinking(true);
+
+    fetch(`${AI_SERVER_URL}/move`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        board,
+        currentTurn,
+        phase,
+        activeViking,
+        lastSkip: session.gameState.lastSkip,
+        whiteScore,
+        redScore,
+      }),
+    })
+      .then((res) => res.json())
+      .then((move) => {
+        if (move.type === "moveViking") {
+          sendGameMsg(
+            createRagnarocksMsg(RagnarocksMsgType.MoveViking, {
+              from: move.from_pos as [number, number],
+              to: move.to as [number, number],
+            }),
+          );
+        } else if (move.type === "placeRunestone") {
+          sendGameMsg(
+            createRagnarocksMsg(RagnarocksMsgType.PlaceRunestone, move.coords as [number, number]),
+          );
+        } else if (move.type === "skip") {
+          sendGameMsg(createRagnarocksMsg(RagnarocksMsgType.Skip));
+        }
+      })
+      .catch((err) => console.error("AI server error:", err))
+      .finally(() => {
+        setAiThinking(false);
+        aiRequestInFlight.current = false;
+      });
+  }, [isAiTurn, board, currentTurn, phase, activeViking]);
 
   const myVikingValue =
     myColor === PlayerColor.White ? CellValue.WhiteViking : CellValue.RedViking;
@@ -168,6 +217,7 @@ const Ragnarocks = ({ socket, session }: GameProps<GameState>) => {
         isMyTurn={isMyTurn}
         isWaiting={isWaiting}
         isOpponentTurn={isOpponentTurn}
+        aiThinking={aiThinking}
         iAmWinner={won === myColor}
         phase={phase}
         myColor={myColor}

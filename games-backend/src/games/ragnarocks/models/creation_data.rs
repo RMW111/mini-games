@@ -13,4 +13,6 @@ pub enum BoardSize {
 pub struct CreationData {
     pub board_size: BoardSize,
     pub color: PlayerColor,
+    #[serde(default)]
+    pub vs_ai: bool,
 }

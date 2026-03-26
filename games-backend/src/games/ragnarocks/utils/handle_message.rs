@@ -28,7 +28,12 @@ impl<'a> RagnarocksHandler<'a> {
             .find(|&p| p.role == ParticipantRole::Creator)
             .expect("There must be a creator in a game");
 
-        let player_color = if user.id == creator.user_id {
+        let is_creator = user.id == creator.user_id;
+        let player_color = if game_state.vs_ai() && is_creator {
+            // In vs AI mode, creator can make moves for both sides
+            // (frontend sends AI moves on behalf of the AI player)
+            game_state.current_turn()
+        } else if is_creator {
             game_state.creator_color()
         } else {
             crate::games::ragnarocks::models::color::get_opposite_color(game_state.creator_color())
