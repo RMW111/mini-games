@@ -95,6 +95,12 @@ def get_ai_move(req: GameStateRequest) -> MoveResponse:
     best_idx = visit_probs.argmax()
     action = actions[best_idx]
 
+    # Log AI decision for debugging
+    top_indices = visit_probs.argsort()[::-1][:5]
+    top_actions = [(actions[i], f"{visit_probs[i]:.3f}") for i in top_indices if visit_probs[i] > 0]
+    print(f"[AI] phase={state.phase}, turn={state.current_turn}, "
+          f"best={action} ({visit_probs[best_idx]:.3f}), top={top_actions}")
+
     if action == "skip":
         return MoveResponse(type="skip")
     elif state.phase == "move_viking":
