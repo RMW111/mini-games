@@ -30,6 +30,7 @@ export interface GameState {
   phase: TurnPhase;
   activeViking: Coords | null;
   previousVikingPos: Coords | null;
+  vsAi: boolean;
 }
 
 export enum RagnarocksMsgType {

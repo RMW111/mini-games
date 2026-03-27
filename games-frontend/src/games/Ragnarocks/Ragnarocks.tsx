@@ -31,7 +31,7 @@ const Ragnarocks = ({ socket, session }: GameProps<GameState>) => {
   const { sendGameMsg } = useSessionWS(socket.current, GameSlug.Ragnarocks);
   const [selectedViking, setSelectedViking] = useState<[number, number] | null>(null);
 
-  const { board, currentTurn, phase, activeViking, won, whiteScore, redScore } =
+  const { board, currentTurn, phase, activeViking, won, whiteScore, redScore, vsAi } =
     session.gameState;
   const isGameOver = session.status === SessionStatus.Completed;
 
@@ -44,9 +44,10 @@ const Ragnarocks = ({ socket, session }: GameProps<GameState>) => {
     ? session.gameState.creatorColor
     : getOppositeColor(session.gameState.creatorColor);
 
+  const isAiTurn = vsAi && currentTurn !== myColor && !isGameOver;
   const isMyTurn = currentTurn === myColor && !isGameOver;
-  const isWaiting = session.participants.length < 2;
-  const isOpponentTurn = !isMyTurn && !isGameOver && !isWaiting;
+  const isWaiting = !vsAi && session.participants.length < 2;
+  const isOpponentTurn = !isMyTurn && !isGameOver && !isWaiting && !isAiTurn;
 
   const myVikingValue =
     myColor === PlayerColor.White ? CellValue.WhiteViking : CellValue.RedViking;
@@ -168,6 +169,7 @@ const Ragnarocks = ({ socket, session }: GameProps<GameState>) => {
         isMyTurn={isMyTurn}
         isWaiting={isWaiting}
         isOpponentTurn={isOpponentTurn}
+        isAiTurn={isAiTurn}
         iAmWinner={won === myColor}
         phase={phase}
         myColor={myColor}

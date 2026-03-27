@@ -25,6 +25,8 @@ pub struct RagnarocksState {
     phase: TurnPhase,
     active_viking: Option<Coords>,
     previous_viking_pos: Option<Coords>,
+    #[serde(default)]
+    vs_ai: bool,
 }
 
 impl RagnarocksState {
@@ -73,11 +75,24 @@ impl RagnarocksState {
             phase: TurnPhase::MoveViking,
             active_viking: None,
             previous_viking_pos: None,
+            vs_ai: data.vs_ai,
         }
     }
 
     pub fn creator_color(&self) -> PlayerColor {
         self.creator_color
+    }
+
+    pub fn vs_ai(&self) -> bool {
+        self.vs_ai
+    }
+
+    pub fn current_turn(&self) -> PlayerColor {
+        self.current_turn
+    }
+
+    pub fn phase(&self) -> TurnPhase {
+        self.phase.clone()
     }
 
     pub fn is_game_over(&self) -> bool {

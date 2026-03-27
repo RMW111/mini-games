@@ -23,10 +23,16 @@ const PLAYER_COLORS: { value: PlayerColor; label: string }[] = [
   { value: PlayerColor.Red, label: "Красные" },
 ];
 
+enum Opponent {
+  Human = "human",
+  AI = "ai",
+}
+
 export const CreateRagnarocksGamePage = () => {
   const navigate = useNavigate();
   const [boardSize, setBoardSize] = useState<BoardSize>(BoardSize.Small);
   const [selectedColor, setSelectedColor] = useState<PlayerColor>(PlayerColor.White);
+  const [opponent, setOpponent] = useState<Opponent>(Opponent.Human);
   const [isGameCreating, setIsGameCreating] = useState(false);
 
   const handleCreateGame = () => {
@@ -34,6 +40,7 @@ export const CreateRagnarocksGamePage = () => {
     const creationData = {
       boardSize,
       color: selectedColor,
+      vsAi: opponent === Opponent.AI,
     };
     API.sessions
       .createNew({ slug: GameSlug.Ragnarocks, creationData })
@@ -49,6 +56,24 @@ export const CreateRagnarocksGamePage = () => {
       description="Выберите размер поля и цвет викингов для начала новой партии."
     >
       <div className={styles.settingsContainer}>
+        <div className={styles.optionGroup}>
+          <label className={styles.label}>Противник:</label>
+          <div className={styles.buttonGroup}>
+            <button
+              className={cn(styles.optionButton, { [styles.active]: opponent === Opponent.Human })}
+              onClick={() => setOpponent(Opponent.Human)}
+            >
+              <span className={styles.optionLabel}>Человек</span>
+            </button>
+            <button
+              className={cn(styles.optionButton, { [styles.active]: opponent === Opponent.AI })}
+              onClick={() => setOpponent(Opponent.AI)}
+            >
+              <span className={styles.optionLabel}>AI</span>
+            </button>
+          </div>
+        </div>
+
         <div className={styles.optionGroup}>
           <label className={styles.label}>Размер поля:</label>
           <div className={styles.buttonGroup}>

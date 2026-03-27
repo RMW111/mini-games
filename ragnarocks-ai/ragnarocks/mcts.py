@@ -112,15 +112,28 @@ class MCTS:
         return node
 
     def _backpropagate(self, node: MCTSNode, value: float) -> None:
-        """Propagate the value up the tree, flipping sign for alternating players."""
+        """Propagate the value up the tree.
+
+        Each node stores value from its PARENT's perspective so that
+        parent.best_child() (which picks max q) always picks the best
+        action for the selecting player.
+
+        In this game a turn has two phases (move viking, place runestone)
+        by the SAME player, so we cannot simply negate at every level.
+        Instead, each node stores +value if its parent is the same player
+        as the leaf, or -value otherwise.
+        """
+        leaf_player = node.state.current_player()
         current = node
         while current is not None:
             current.visit_count += 1
-            # Value is from the perspective of the player who just evaluated.
-            # If the current node's player matches, use +value; otherwise -value.
-            # Since players alternate, we flip at each level.
-            current.total_value += value
-            value = -value
+            if current.parent is not None:
+                if current.parent.state.current_player() == leaf_player:
+                    current.total_value += value
+                else:
+                    current.total_value += -value
+            else:
+                current.total_value += value
             current = current.parent
 
     def search(self, state: GameState) -> tuple[list, np.ndarray]:

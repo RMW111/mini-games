@@ -8,6 +8,7 @@ interface GamePanelProps {
   isMyTurn: boolean;
   isWaiting: boolean;
   isOpponentTurn: boolean;
+  isAiTurn: boolean;
   iAmWinner: boolean;
   phase: TurnPhase;
   myColor: PlayerColor;
@@ -25,6 +26,7 @@ const GamePanel = ({
   isMyTurn,
   isWaiting,
   isOpponentTurn,
+  isAiTurn,
   iAmWinner,
   phase,
   myColor,
@@ -60,6 +62,15 @@ const GamePanel = ({
       );
     }
 
+    if (isAiTurn) {
+      return (
+        <div className={cn(styles.badge, styles.badge_primary)}>
+          <span>◐</span>
+          <span>AI ДУМАЕТ</span>
+        </div>
+      );
+    }
+
     if (isOpponentTurn) {
       return (
         <div className={cn(styles.badge, styles.badge_primary)}>
@@ -87,6 +98,7 @@ const GamePanel = ({
     }
 
     if (isWaiting) return <div className={styles.title}>Ожидание соперника...</div>;
+    if (isAiTurn) return <div className={styles.title}>AI думает...</div>;
     if (isOpponentTurn) return <div className={styles.title}>Ход соперника</div>;
 
     if (phase === TurnPhase.MoveViking) {
@@ -98,6 +110,10 @@ const GamePanel = ({
 
   const renderSubtitle = () => {
     if (isGameOver || isWaiting) return null;
+
+    if (isAiTurn) {
+      return <div className={styles.subtitle}>AI анализирует позицию...</div>;
+    }
 
     if (isOpponentTurn) {
       return <div className={styles.subtitle}>Ожидайте, соперник думает...</div>;
@@ -146,7 +162,7 @@ const GamePanel = ({
       {renderBadge()}
       {renderTitle()}
 
-      {isWaiting && (
+      {(isWaiting || isAiTurn) && (
         <div className={styles.loadingDots}>
           <span className={styles.loadingDot} />
           <span className={styles.loadingDot} />
