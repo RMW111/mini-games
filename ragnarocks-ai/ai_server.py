@@ -71,10 +71,13 @@ def reconstruct_game_state(req: GameStateRequest) -> GameState:
         for c, cell in enumerate(row):
             board.set(r, c, cell)
 
+    # Map camelCase phase names from frontend to Python constants
+    phase_map = {"moveViking": "move_viking", "placeRunestone": "place_runestone"}
+
     state = PyGameState.__new__(PyGameState)
     state.board = board
     state.current_turn = req.currentTurn
-    state.phase = req.phase
+    state.phase = phase_map.get(req.phase, req.phase)
     state.active_viking = tuple(req.activeViking) if req.activeViking else None
     state.previous_viking_pos = None
     state.last_skip = req.lastSkip
