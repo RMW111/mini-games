@@ -15,11 +15,13 @@ use crate::games::go::utils::handle_message::handle_go_message;
 use crate::games::minesweeper::utils::handle_message::handle_minesweeper_message;
 use crate::games::ragnarocks::utils::handle_message::handle_ragnarocks_message;
 use crate::games::tic_tac_toe::utils::handle_message::handle_tic_tac_toe_message;
+use crate::models::http::HTTPClient;
 use crate::models::session::SessionStatus;
 use crate::models::user::User;
 use axum::extract::ws::{CloseFrame, Message, WebSocket};
 use axum::extract::{Path, WebSocketUpgrade};
 use axum::response::{IntoResponse, Response};
+use axum::Extension;
 use bytes::Bytes;
 use futures::SinkExt;
 use futures::StreamExt;
@@ -33,13 +35,14 @@ pub async fn ws_handler(
     ws: WebSocketUpgrade,
     DatabaseConnection(pool): DatabaseConnection,
     WsConnections(connections): WsConnections,
+    Extension(http_client): Extension<HTTPClient>,
     Path(session_id): Path<Uuid>,
     user: User,
 ) -> Response {
     match add_participant_and_notify(&pool, &connections, session_id, &user).await {
-        Ok(()) => {
-            ws.on_upgrade(move |socket| handle_socket(socket, pool, connections, session_id, user))
-        }
+        Ok(()) => ws.on_upgrade(move |socket| {
+            handle_socket(socket, pool, connections, session_id, user, http_client)
+        }),
         Err(e) => ws
             .on_upgrade(|mut socket| async move {
                 let _ = socket
@@ -59,6 +62,7 @@ async fn handle_socket(
     connections: SessionConnections,
     session_id: Uuid,
     user: User,
+    http_client: HTTPClient,
 ) {
     let connection_id = Uuid::new_v4();
     let (mut sender, mut receiver) = socket.split();
@@ -179,7 +183,7 @@ async fn handle_socket(
                             let handler_data = HandlerData {
                                 pool: pool.clone(),
                                 user: user.clone(),
-                                // connection_id,
+                                http_client: http_client.clone(),
                             };
 
                             handle_client_message(message, &mut live_session, handler_data).await;

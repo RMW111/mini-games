@@ -91,6 +91,10 @@ impl RagnarocksState {
         self.current_turn
     }
 
+    pub fn phase(&self) -> TurnPhase {
+        self.phase.clone()
+    }
+
     pub fn is_game_over(&self) -> bool {
         self.won.is_some()
     }
